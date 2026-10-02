@@ -1,0 +1,16 @@
+layer,code,class,cells,km2,share_pct,score
+lulc,12,Cropland,81010,7482.3,65.56,1.0
+lulc,9,Savanna,15996,1477.6,12.95,0.7
+lulc,4,Deciduous Broadleaf Forest,13020,1202.3,10.53,0.3
+lulc,10,Grassland,9591,886.5,7.77,0.85
+lulc,5,Mixed Forest,1283,118.4,1.04,0.35
+lulc,13,Urban and Built-up,1261,116.6,1.02,0.1
+lulc,14,Cropland / Natural Vegetation Mosaic,562,51.9,0.45,0.9
+lulc,11,Permanent Wetland,434,40.1,0.35,0.2
+lulc,8,Woody Savanna,245,22.7,0.2,0.6
+lulc,17,Water Bodies,105,9.7,0.08,0.0
+lulc,7,Open Shrubland,48,4.4,0.04,0.7
+soil,4,Clay Loam,96172,8881.7,77.82,0.6
+soil,1,Clay,22980,2124.0,18.61,0.25
+soil,6,Sandy Clay Loam,3938,363.7,3.19,0.8
+soil,7,Loam,465,42.9,0.38,1.0

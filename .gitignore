@@ -1,0 +1,46 @@
+# ── Secrets ──────────────────────────────────────────────────────────────────
+.env
+.env.local
+*.key
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ── Virtual environments ─────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Editors / OS ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── Generated outputs ────────────────────────────────────────────────────────
+# Rasters, tables and intermediate artefacts are regenerable and stay out.
+# The paper's figures and its machine-readable number tables are tracked:
+# data/*.tif is excluded (297 MB), so a fresh clone CANNOT regenerate them and
+# without these the repository would show no results at all.
+outputs/*
+!outputs/figures/
+!outputs/paper/
+*.log
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+# Source rasters/vectors are large. Keep them out of git and document how to
+# regenerate them from QGIS (see README.md).  Delete these three lines if you
+# decide the ~50 MB of layers should be versioned with the code.
+data/*.tif
+data/*.tif.aux.xml
+data/*.shp
+data/*.shx
+data/*.dbf
+data/*.prj
+data/*.cpg
+data/*.qmd
+!data/boundary.geojson
+!data/rivers.geojson

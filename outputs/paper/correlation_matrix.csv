@@ -1,0 +1,7 @@
+algorithm_a,algorithm_b,spearman,pearson
+AHP + WLC,AHP + TOPSIS,0.9643,0.9621
+AHP + WLC,Fuzzy-AHP + WLC,0.9998,0.9998
+AHP + WLC,Fuzzy-AHP + TOPSIS,0.9672,0.9654
+AHP + TOPSIS,Fuzzy-AHP + WLC,0.9588,0.9568
+AHP + TOPSIS,Fuzzy-AHP + TOPSIS,0.9999,0.9999
+Fuzzy-AHP + WLC,Fuzzy-AHP + TOPSIS,0.962,0.9604

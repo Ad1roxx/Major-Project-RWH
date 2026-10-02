@@ -1,0 +1,6 @@
+scenario,lon,lat,score,cr,settlement_km
+Baseline (balanced),79.6825,20.3645,0.957,0.0235,7.19
+Maximise recharge,79.6768,20.3956,0.962,0.0044,3.85
+Community-focused,79.6768,20.3956,0.965,0.0059,3.85
+Low-earthwork siting,79.6768,20.3956,0.957,0.0078,3.85
+Fertile farmland,79.6768,20.3956,0.968,0.0146,3.85

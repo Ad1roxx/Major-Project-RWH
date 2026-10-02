@@ -1,0 +1,27 @@
+measure,percentile,fixed_bands
+High suitability %,6.44,37.65
+High suitability km2,735.0,4297.1
+Medium %,52.48,60.77
+Low %,41.08,1.58
+composite mean,0.6733,0.8258
+composite median,0.684,0.8304
+spearman,0.7839224967556244,
+pearson,0.8181909322738647,
+class_agreement_pct,31.3,
+top10_overlap,0,
+top25_overlap,4,
+transition_High_to_Low,0,0.0
+transition_High_to_Medium,0,0.0
+transition_High_to_High,7966,735.0
+transition_Medium_to_Low,0,0.0
+transition_Medium_to_Medium,28763,2654.4
+transition_Medium_to_High,36123,3334.3
+transition_Low_to_Low,1942,179.8
+transition_Low_to_Medium,46300,4281.1
+transition_Low_to_High,2461,227.8
+effweight_slope,31.64,25.18
+effweight_rainfall,36.95,49.8
+effweight_drainage,7.18,5.72
+effweight_soil,12.47,10.05
+effweight_lulc,7.89,6.18
+effweight_population,3.88,3.07

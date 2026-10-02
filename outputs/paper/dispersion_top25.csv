@@ -1,0 +1,7 @@
+criterion,sd,min,max
+slope,0.0183,0.905,0.993
+rainfall,0.0539,0.805,0.999
+soil,0.1742,0.6,1.0
+lulc,0.0294,0.85,1.0
+population,0.2387,0.1,0.995
+drainage,0.1102,0.459,0.957

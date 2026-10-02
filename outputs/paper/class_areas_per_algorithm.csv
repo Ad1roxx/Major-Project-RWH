@@ -1,0 +1,5 @@
+algorithm,high_pct,high_km2,medium_km2,low_km2,total_km2
+AHP + WLC,6.44,735.0,5988.7,4688.7,11412.5
+AHP + TOPSIS,5.65,644.3,5049.2,5718.9,11412.5
+Fuzzy-AHP + WLC,6.04,689.6,6046.5,4676.4,11412.5
+Fuzzy-AHP + TOPSIS,4.92,562.0,5142.7,5707.8,11412.5

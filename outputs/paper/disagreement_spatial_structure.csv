@@ -1,0 +1,11 @@
+band_or_measure,cells,reclassified,rate_pct,km2
+0-2 km,12654,821,6.49,1169.1
+2-5 km,17495,1163,6.65,1616.3
+5-10 km,24283,2053,8.45,2243.2
+10-20 km,35328,5902,16.71,3263.1
+>20 km,33795,5921,17.52,3120.7
+within_5km_rate_pct,6.58,,,
+beyond_5km_rate_pct,14.86,,,
+baseline_High_reclass_pct,19.91,,,
+baseline_Medium_reclass_pct,20.06,,,
+baseline_Low_reclass_pct,2.48,,,

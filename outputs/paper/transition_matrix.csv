@@ -1,0 +1,10 @@
+from_class,to_class,cells,km2
+High,Low,0,0.0
+High,Medium,1586,146.4
+High,High,6380,588.7
+Medium,Low,12412,1146.4
+Medium,Medium,51871,4786.7
+Medium,High,603,55.6
+Low,Low,49444,4572.5
+Low,Medium,1259,116.2
+Low,High,0,0.0
