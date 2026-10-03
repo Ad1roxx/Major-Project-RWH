@@ -952,11 +952,85 @@ def section_19(ctx, csv_dir=None):
               "band_or_measure,cells,reclassified,rate_pct,km2", rows)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# §20 — Is the WLC/TOPSIS class disagreement a threshold artefact?
+# ─────────────────────────────────────────────────────────────────────────────
+# Raised in review: the same breakpoints (0.65 / 0.85) are applied to the WLC
+# score and the TOPSIS closeness coefficient, which have different
+# distributions. If most of the Medium-to-Low migration is caused by that
+# rather than by any real difference in ranking, the comparison is measuring
+# the classifier, not the method.
+#
+# Testable. Give TOPSIS the breakpoints that reproduce WLC's class shares
+# exactly, re-measure agreement, and see how much is recovered.
+
+def section_20(ctx, csv_dir=None):
+    from scipy.stats import spearmanr
+    stack, mask, weights, cr, area = ctx
+    res = _score_all_algorithms(stack)
+    w, t = res["AHP + WLC"], res["AHP + TOPSIS"]
+    sw, st = w["suitability_raster"], t["suitability_raster"]
+    cw, ct = w["classified_raster"], t["classified_raster"]
+    both = mask & ~np.isnan(sw) & ~np.isnan(st)
+    a, b = sw[both], st[both]
+
+    print("### 20. Class disagreement: threshold artefact or real ranking difference?")
+    print("Domain: in-district cells.\n")
+    print(f"{'':<14}{'mean':>9}{'sd':>9}{'p25':>9}{'p75':>9}")
+    for lab, v in (("WLC score", a), ("TOPSIS closeness", b)):
+        print(f"{lab:<14}{v.mean():>9.4f}{v.std():>9.4f}"
+              f"{np.percentile(v, 25):>9.4f}{np.percentile(v, 75):>9.4f}")
+    print("\nThe two scores are differently distributed, so fixed breakpoints")
+    print("are not neutral across them. That is the premise of the test.\n")
+
+    rho = float(spearmanr(a, b).statistic)
+    share_low = float((cw[both] == 1).mean())
+    share_high = float((cw[both] == 3).mean())
+    t_low = float(np.quantile(b, share_low))
+    t_high = float(np.quantile(b, 1 - share_high))
+    matched = np.where(b <= t_low, 1, np.where(b <= t_high, 2, 3))
+
+    fixed_agree = 100 * float((cw[both] == ct[both]).mean())
+    match_agree = 100 * float((cw[both] == matched).mean())
+    recovered = match_agree - fixed_agree
+    disagreement = 100 - fixed_agree
+
+    print(f"  Spearman rho between the surfaces      : {rho:.4f}")
+    print(f"  class agreement, fixed 0.65 / 0.85     : {fixed_agree:.2f}%")
+    print(f"  class agreement, quantile-matched      : {match_agree:.2f}%")
+    print(f"    (matched breakpoints: {t_low:.4f} / {t_high:.4f})")
+    print(f"  disagreement at fixed breakpoints      : {disagreement:.2f} pp")
+    print(f"  recovered by matching                  : {recovered:.2f} pp "
+          f"= {100 * recovered / disagreement:.0f}% of it")
+
+    print()
+    if recovered / disagreement > 0.5:
+        print("  VERDICT: mostly a THRESHOLD ARTEFACT. Report the comparison on")
+        print("  matched breakpoints or on rank overlap, not on fixed ones.")
+    else:
+        print("  VERDICT: mostly a GENUINE RANKING DIFFERENCE. Matching the")
+        print("  breakpoints recovers only a minority of the disagreement, so the")
+        print("  two methods really do order cells differently — the fixed")
+        print("  breakpoints are not what is driving the Medium-to-Low migration.")
+        print("  State the test and its result; do not leave it as an open")
+        print("  objection, and do not over-correct by claiming the comparison is")
+        print("  invalid.")
+
+    rows = [["spearman_rho", round(rho, 4)],
+            ["class_agreement_fixed_pct", round(fixed_agree, 2)],
+            ["class_agreement_matched_pct", round(match_agree, 2)],
+            ["matched_breakpoint_low", round(t_low, 4)],
+            ["matched_breakpoint_high", round(t_high, 4)],
+            ["recovered_pp", round(recovered, 2)],
+            ["recovered_share_of_disagreement", round(recovered / disagreement, 3)]]
+    _emit_csv(csv_dir, "threshold_artefact_test.csv", "measure,value", rows)
+
+
 SECTIONS = {
     2: section_2, 3: section_3, 4: section_4, 6: section_6, 7: section_7,
     8: section_8, 9: section_9, 10: section_10, 11: section_11,
     12: section_12, 13: section_13, 14: section_14, 16: section_16,
-    17: section_17, 18: section_18, 19: section_19,
+    17: section_17, 18: section_18, 19: section_19, 20: section_20,
 }
 
 

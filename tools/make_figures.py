@@ -1,13 +1,13 @@
 """
 tools/make_figures.py
 ─────────────────────
-Publication figures for the research paper, as PDF (vector) plus PNG at 300 dpi.
+Publication figures for the research paper, as PNG at 300 dpi.
 
     python tools/make_figures.py              # every figure this tool owns
     python tools/make_figures.py --only 11    # one figure
     python tools/make_figures.py --dpi 600
 
-Writes to outputs/figures/figNN.pdf and figNN.png.
+Writes to outputs/figures/figNN.png.
 
 Scope — this tool deliberately does NOT produce every figure in the paper
     Cartographic figures belong in QGIS, where labelling, insets and print
@@ -62,7 +62,28 @@ DPI = 300
 # Colourblind-safe categorical palette (Okabe–Ito). Used wherever a small
 # number of discrete series must be distinguished.
 OKABE = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9"]
-CLASS_COLOURS = {"Low": "#B2182B", "Medium": "#F4A582", "High": "#2166AC"}
+
+# Medium is deliberately near-neutral. Drawn in the salmon half of a diverging
+# ramp it read as "mildly bad" rather than "in between", which made the
+# High/Low contrast harder to see.
+CLASS_COLOURS = {"Low": "#B2182B", "Medium": "#E8E4DC", "High": "#2166AC"}
+
+# One colour per MEANING, used by every figure. Previously blue meant "AHP
+# weighting" in one figure and "aggregation effect" in the next, so a reader
+# moving between two adjacent figures would misread one of them.
+MEANING = {
+    "AHP":         OKABE[0],   # weighting method
+    "Fuzzy-AHP":   OKABE[1],
+    "method":      "#6E7B8B",  # any factorial method effect — one neutral grey-blue
+    "interaction": "#AFB8C1",  # the same, lighter
+    "rainfall":    OKABE[2],   # upstream scoring decision
+    "soil":        OKABE[3],   # upstream data correction
+}
+
+
+def _mn(x, fmt="+.3f") -> str:
+    """Format a number with a true minus sign (U+2212), not hyphen-minus."""
+    return format(x, fmt).replace("-", "−")
 
 CRIT_LABEL = {
     "slope": "Slope", "rainfall": "Rainfall", "drainage": "Drainage density",
@@ -100,6 +121,9 @@ def _setup_style() -> None:
         "savefig.pad_inches": 0.03,
         "pdf.fonttype": 42,     # embed as TrueType so text stays editable
         "ps.fonttype": 42,
+        # Tick labels get a true minus sign. Annotation strings are formatted
+        # through _mn() for the same reason.
+        "axes.unicode_minus": True,
     })
 
 
@@ -121,9 +145,15 @@ def _panel_letters(axes, offset=(-0.02, 1.06), skip=()) -> None:
 
 
 def _save(fig, number: int, slug: str, dpi: int = DPI) -> None:
+    """PNG only, at 300 dpi.
+
+    PDFs were dropped on 2026-10-03: the vector copies roughly doubled the
+    output volume for no benefit while the figures are still being iterated.
+    If a journal asks for vector art at submission, add `fig.savefig(stem +
+    ".pdf")` back here — nothing else needs to change.
+    """
     os.makedirs(OUTDIR, exist_ok=True)
     stem = os.path.join(OUTDIR, f"fig{number:02d}")
-    fig.savefig(stem + ".pdf")
     fig.savefig(stem + ".png", dpi=dpi)
     plt.close(fig)
     print(f"  fig{number:02d}  {slug}")
@@ -639,29 +669,25 @@ def fig_10(ctx):
     for ax, name in zip(axes.ravel(), order):
         r = ctx.algos[name]
         cls = r["area_statistics"]["classes"]
+        # Method name only. Carrying the High % here as well made panel (d)'s
+        # title overrun its frame and touch the image edge; it is in the
+        # subtitle anyway.
         _map(ax, ctx.inside(r["classified_raster"]), ctx.extent, ctx.boundary,
-             cmap=cmap, norm=norm,
-             title=f"{name}   High {cls['High']['percent']:.2f}%",
-             furniture=False, grat=False)
-        ax.annotate(f"High {cls['High']['area_km2']:,.0f} km²   "
-                    f"Med {cls['Medium']['percent']:.1f}%   "
-                    f"Low {cls['Low']['percent']:.1f}%",
+             cmap=cmap, norm=norm, title=name, furniture=False, grat=False)
+        # One unit, one precision, across all three classes.
+        ax.annotate(f"High {cls['High']['percent']:.2f}% "
+                    f"({cls['High']['area_km2']:,.0f} km²)   "
+                    f"Medium {cls['Medium']['percent']:.2f}%   "
+                    f"Low {cls['Low']['percent']:.2f}%",
                     xy=(0.5, -0.04), xycoords="axes fraction", ha="center",
                     va="top", fontsize=7, color="0.30")
 
-    # Furniture in the figure margin, clear of the data. The previous version
-    # drew the north arrow over the district outline in panel (b).
-    bar_ax = fig.add_axes([0.10, 0.035, 0.22, 0.045])
-    bar_ax.axis("off")
-    bar_ax.set_xlim(ctx.extent[0], ctx.extent[1])
-    bar_ax.set_ylim(ctx.extent[2], ctx.extent[3])
-    _add_scalebar(bar_ax, ctx.extent, km=25, x_frac=0.02, y_frac=0.35)
-    n_ax = fig.add_axes([0.345, 0.028, 0.045, 0.058])
-    n_ax.axis("off")
-    n_ax.annotate("N", xy=(0.5, 0.95), xytext=(0.5, 0.05),
-                  xycoords="axes fraction", textcoords="axes fraction",
-                  ha="center", va="center", fontsize=8, fontweight="bold",
-                  arrowprops=dict(arrowstyle="-|>", color="black", lw=1.0))
+    # Furniture inside panel (a)'s empty lower-left corner, drawn in map units
+    # from that axis's data transform. Floating it in figure coordinates left
+    # the scale bar outside every panel and put the north arrow directly under
+    # panel (c)'s subtitle, where it read as pointing at a number.
+    _add_scalebar(axes[0, 0], ctx.extent, km=25, x_frac=0.045, y_frac=0.07)
+    _add_north(axes[0, 0], ctx.extent, x_frac=0.30, y_frac=0.055)
 
     _panel_letters(axes, offset=(-0.15, 1.00))
     handles = [Rectangle((0, 0), 1, 1, color=CLASS_COLOURS[k])
@@ -673,154 +699,214 @@ def fig_10(ctx):
                          f"Low (≤ {C.SUITABILITY_THRESHOLDS[0]})"],
                loc="lower center", bbox_to_anchor=(0.60, -0.005), frameon=False,
                ncol=3, fontsize=8, handlelength=1.4, columnspacing=1.8)
-    fig.suptitle("Four MCDA methods on one criteria stack — classified surfaces, "
-                 "shared extent", y=0.97)
+    fig.suptitle("Four MCDA methods on one criteria stack — classified surfaces", y=0.97)
     _save(fig, 10, "four-method classified surfaces")
+    agg_h, _w, _i = _main_effects(ctx, "High")
+    agg_l, _w2, _i2 = _main_effects(ctx, "Low")
+    return {"aggregation_on_High_pp": round(agg_h, 3),
+            "aggregation_on_Low_pp": round(agg_l, 3),
+            "CAPTION": (
+                "All four panels share extent, scale and breakpoints. The scale "
+                "bar and north arrow in panel (a) apply to all four. Note the "
+                "aggregation rule moves the Low-class share by "
+                f"{agg_l:+.2f} pp against {agg_h:+.2f} pp on High — method "
+                "sensitivity depends on which class is examined. The same "
+                "breakpoints (0.65/0.85) are applied to the WLC score and the "
+                "TOPSIS closeness coefficient, which are differently "
+                "distributed; quantile-matching the breakpoints recovers only "
+                "part of the disagreement, so it is mostly a genuine ranking "
+                "difference rather than a threshold artefact. See "
+                "tools/paper_figures.py --section 20.")}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Figures 11 and 12 — the factorial design
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _factorial(ctx):
-    h = {n: ctx.algos[n]["area_statistics"]["classes"]["High"]["percent"]
+def _factorial(ctx, klass="High"):
+    h = {n: ctx.algos[n]["area_statistics"]["classes"][klass]["percent"]
          for n in ALGORITHMS}
     aw, at = h["AHP + WLC"], h["AHP + TOPSIS"]
     fw, ft = h["Fuzzy-AHP + WLC"], h["Fuzzy-AHP + TOPSIS"]
     return h, aw, at, fw, ft
 
 
+def _main_effects(ctx, klass="High"):
+    """Aggregation, weighting and interaction effects on one class share.
+
+    Standard factorial (Yates) convention: the interaction is HALF the
+    difference of the simple effects, so differencing the two slopes plotted in
+    Figure 11 gives twice this value. Stated in both captions.
+    """
+    _h, aw, at, fw, ft = _factorial(ctx, klass)
+    return (((at + ft) / 2) - ((aw + fw) / 2),      # aggregation
+            ((fw + ft) / 2) - ((aw + at) / 2),      # weighting
+            ((aw + ft) - (at + fw)) / 2)            # interaction
+
+
 def fig_11(ctx):
     _h, aw, at, fw, ft = _factorial(ctx)
-    fig, ax = plt.subplots(figsize=(5.4, 4.2))
+    fig, ax = plt.subplots(figsize=(6.0, 4.4))
     x = [0, 1]
-    ax.plot(x, [aw, at], "o-", color=OKABE[0], label="AHP weighting", ms=6)
-    ax.plot(x, [fw, ft], "s--", color=OKABE[1], label="Fuzzy-AHP weighting", ms=6)
+    ax.plot(x, [aw, at], "o-", color=MEANING["AHP"], label="AHP weighting", ms=6)
+    ax.plot(x, [fw, ft], "s--", color=MEANING["Fuzzy-AHP"], label="Fuzzy-AHP weighting", ms=6)
     for xx, yy in ((0, aw), (1, at)):
         ax.annotate(f"{yy:.2f}", (xx, yy), textcoords="offset points",
-                    xytext=(0, 8), ha="center", fontsize=7.5, color=OKABE[0])
+                    xytext=(0, 8), ha="center", fontsize=7.5, color=MEANING["AHP"])
     for xx, yy in ((0, fw), (1, ft)):
         ax.annotate(f"{yy:.2f}", (xx, yy), textcoords="offset points",
-                    xytext=(0, -13), ha="center", fontsize=7.5, color=OKABE[1])
+                    xytext=(0, -13), ha="center", fontsize=7.5, color=MEANING["Fuzzy-AHP"])
     ax.set_xticks(x)
     ax.set_xticklabels(["WLC", "TOPSIS"])
     ax.set_xlim(-0.25, 1.25)
     # Zero-based. A 4.9-6.5 window magnified a 1.5-point range to fill the panel
     # and made a sub-percentage-point effect look enormous.
-    ax.set_ylim(0, max(aw, fw) * 1.35)
-    ax.set_xlabel("aggregation rule")
-    ax.set_ylabel("highly suitable area (% of district)")
+    ax.set_ylim(0, 8)
+    ax.set_xlabel("Aggregation rule")
+    ax.set_ylabel("High-class share (% of district)")
     ax.legend(frameon=False, loc="lower left")
     ax.grid(True, axis="y")
     d_ahp, d_fz = at - aw, ft - fw
-    ax.set_title("Both effects are small; the interaction is smaller still")
+    inter = ((aw + ft) - (at + fw)) / 2
+    # Scoped to the High class. Unscoped, "both effects are small" is false:
+    # the same switch moves the Low-class share by about 9 pp (see fig 10).
+    ax.set_title("On the High-class share, method effects stay under 1.2 pp")
+    # Labelled as simple effects, not as the weighting methods themselves —
+    # "AHP −0.79" read as "the effect of AHP".
     ax.annotate("\n".join([
-                    f"AHP {d_ahp:+.2f} pp",
-                    f"Fuzzy-AHP {d_fz:+.2f} pp",
-                    f"interaction {((aw + ft) - (at + fw)) / 2:+.3f} pp"]),
+                    f"WLC→TOPSIS | AHP:        {_mn(d_ahp, '+.2f')} pp",
+                    f"WLC→TOPSIS | Fuzzy-AHP:  {_mn(d_fz, '+.2f')} pp",
+                    f"interaction:             {_mn(inter, '+.3f')} pp"]),
                 xy=(0.97, 0.97), xycoords="axes fraction", ha="right", va="top",
-                fontsize=7.5, color="0.30")
+                fontsize=7.5, color="0.30", family="monospace")
     fig.tight_layout()
-    _save(fig, 11, "factorial interaction plot")
+    _save(fig, 11, "factorial interaction, High-class share")
+    return {"simple_effect_AHP_pp": round(d_ahp, 3),
+            "simple_effect_Fuzzy_pp": round(d_fz, 3),
+            "interaction_pp": round(inter, 3),
+            "CAPTION": "Interaction = half the difference of the simple effects "
+                       "(factorial-effect convention), consistent with Fig. 12. "
+                       "A reader differencing the two plotted slopes gets "
+                       f"{d_fz - d_ahp:+.2f} pp, which is twice this value. "
+                       f"The {abs(agg_km2(ctx)):.0f} km2 equivalent of the "
+                       "aggregation effect is given in the Results."}
+
+
+def agg_km2(ctx):
+    """The aggregation main effect expressed as area, for the caption.
+
+    'Small' needs a denominator. 0.955 pp of an 11,412 km2 district is about
+    109 km2, which is roughly 15% of the High class — worth stating rather
+    than leaving the reader to infer it from a percentage point.
+    """
+    total = ctx.base["area_statistics"]["total_km2"]
+    _h, aw, at, fw, ft = _factorial(ctx)
+    return (((at + ft) / 2) - ((aw + fw) / 2)) / 100.0 * total
 
 
 def fig_12(ctx):
-    """Every analyst decision that moves the answer, on one axis.
+    """Every analyst decision that moves the answer, on two class shares.
 
-    The 2x2 method comparison is the choice the GIS-MCDA literature argues
-    about. Two upstream decisions — how rainfall is scored, and which soil
-    legend is used — move the result by one to two orders of magnitude more.
-    Both extra effects are computed here, not transcribed.
+    Two columns, not one. The method effects are small on the High class and an
+    order of magnitude larger on the Low class, so a single High-only panel
+    understates them and a single Low-only panel overstates them. Showing both
+    is the finding: how sensitive the classification is depends on which class
+    you look at.
+
+    Both upstream effects are computed here, not transcribed.
     """
-    _h, aw, at, fw, ft = _factorial(ctx)
-    agg = ((at + ft) / 2) - ((aw + fw) / 2)
-    wgt = ((fw + ft) / 2) - ((aw + at) / 2)
-    inter = ((aw + ft) - (at + fw)) / 2
-    base_high = ctx.base["area_statistics"]["classes"]["High"]["percent"]
-
-    # Rainfall scoring: percentile rank versus fixed absolute bands.
     from tools.paper_figures import RAINFALL_FIXED_BANDS
-    rain_raw = np.where(ctx.mask, ctx.stack["raw_rasters"]["rainfall"], np.nan)
-    alt = dict(ctx.stack["normalized_rasters"])
-    alt["rainfall"] = np.where(
-        ctx.mask, C.score_continuous_breaks(rain_raw, RAINFALL_FIXED_BANDS), np.nan)
-    st = dict(ctx.stack); st["normalized_rasters"] = alt
-    rain_high = G.score_stack(st, ctx.weights, ctx.cr)[
-        "area_statistics"]["classes"]["High"]["percent"]
-    rain_eff = rain_high - base_high
 
-    # Soil legend: the pre-2026-10-02 table versus the corrected one.
-    alt2 = dict(ctx.stack["normalized_rasters"])
-    alt2["soil"] = np.where(ctx.mask, C.score_categorical(
+    base = {k: ctx.base["area_statistics"]["classes"][k]["percent"]
+            for k in ("High", "Low")}
+
+    def _shares(rasters):
+        st = dict(ctx.stack); st["normalized_rasters"] = rasters
+        r = G.score_stack(st, ctx.weights, ctx.cr)["area_statistics"]["classes"]
+        return {k: r[k]["percent"] for k in ("High", "Low")}
+
+    # Rainfall: percentile rank versus fixed absolute bands, one-at-a-time swap
+    # evaluated under AHP + WLC. NOT a factorial main effect — see the caption.
+    rain_r = dict(ctx.stack["normalized_rasters"])
+    rain_r["rainfall"] = np.where(ctx.mask, C.score_continuous_breaks(
+        np.where(ctx.mask, ctx.stack["raw_rasters"]["rainfall"], np.nan),
+        RAINFALL_FIXED_BANDS), np.nan)
+    rain = _shares(rain_r)
+
+    # Soil: the pre-2026-10-02 legend versus the corrected one. Signed as the
+    # effect OF the correction.
+    soil_r = dict(ctx.stack["normalized_rasters"])
+    soil_r["soil"] = np.where(ctx.mask, C.score_categorical(
         ctx.stack["raw_rasters"]["soil"], _StepHelper.SOIL, C.SOIL_DEFAULT_SCORE), np.nan)
-    st2 = dict(ctx.stack); st2["normalized_rasters"] = alt2
-    soil_high = G.score_stack(st2, ctx.weights, ctx.cr)[
-        "area_statistics"]["classes"]["High"]["percent"]
-    # Signed as the effect OF the correction: applying it removed 12.1 points.
-    # Written the other way round the bar reads as if fixing the bug added area.
-    soil_eff = base_high - soil_high
+    soil = _shares(soil_r)
+
+    agg_h, wgt_h, int_h = _main_effects(ctx, "High")
+    agg_l, wgt_l, int_l = _main_effects(ctx, "Low")
 
     rows = [
-        ("Interaction", inter, "0.70", "method"),
-        ("Weighting\nAHP → Fuzzy-AHP", wgt, OKABE[1], "method"),
-        ("Aggregation\nWLC → TOPSIS", agg, OKABE[0], "method"),
-        ("Soil legend corrected\n(wrong → right)", soil_eff, OKABE[3], "upstream"),
-        ("Rainfall scoring\npercentile → fixed bands", rain_eff, OKABE[2], "upstream"),
+        ("Interaction", int_h, int_l, MEANING["interaction"], False),
+        ("Weighting\nAHP → Fuzzy-AHP", wgt_h, wgt_l, MEANING["method"], False),
+        ("Aggregation\nWLC → TOPSIS", agg_h, agg_l, MEANING["method"], False),
+        ("Soil legend corrected\n(data error, not a choice)",
+         base["High"] - soil["High"], base["Low"] - soil["Low"], MEANING["soil"], True),
+        ("Rainfall scoring\npercentile → fixed bands",
+         rain["High"] - base["High"], rain["Low"] - base["Low"], MEANING["rainfall"], False),
     ]
-    labels = [r[0] for r in rows]
-    vals = np.array([abs(r[1]) for r in rows])
-    cols = [r[2] for r in rows]
 
-    fig, ax = plt.subplots(figsize=(8.4, 4.6))
+    fig, axes = plt.subplots(1, 2, figsize=(10.6, 4.8), sharey=True)
     ypos = np.arange(len(rows))
-    ax.barh(ypos, vals, color=cols, height=0.62)
-    for y, (lab, v, _c, _k) in zip(ypos, rows):
-        ax.annotate(f"{v:+.3f} pp" if abs(v) < 10 else f"{v:+.1f} pp",
-                    (abs(v), y), textcoords="offset points", xytext=(5, 0),
-                    va="center", fontsize=8.5, fontweight="bold")
-    ax.set_yticks(ypos)
-    ax.set_yticklabels(labels, fontsize=8)
-    ax.set_xlabel("absolute change in highly suitable area (percentage points)")
-    ax.set_xlim(0, max(vals) * 1.22)
-    ax.grid(True, axis="x")
-    ax.axhline(2.5, color="black", lw=0.8, ls="--")
-    ax.annotate("choices the comparative\nliterature argues about",
-                xy=(max(vals) * 0.22, 1.0), fontsize=8, color="0.30", va="center")
-    ax.annotate("upstream scoring decisions",
-                xy=(max(vals) * 0.45, 3.5), fontsize=8, color="0.30", va="center")
+    for ax, col, klass in ((axes[0], 1, "High"), (axes[1], 2, "Low")):
+        vals = np.array([abs(r[col]) for r in rows])
+        for y, r in zip(ypos, rows):
+            hatched = r[4]
+            ax.barh(y, abs(r[col]), color=r[3], height=0.62,
+                    hatch="///" if hatched else None,
+                    edgecolor="black" if hatched else "none",
+                    linewidth=0.8 if hatched else 0)
+            ax.annotate(_mn(r[col], "+.2f") + " pp", (abs(r[col]), y),
+                        textcoords="offset points", xytext=(5, 0), va="center",
+                        fontsize=8, fontweight="bold")
+        ax.set_xlim(0, max(vals) * 1.30)
+        ax.set_xlabel(f"|change| in {klass}-class share (pp)")
+        ax.set_title(f"{klass}-class share")
+        ax.grid(True, axis="x")
+        # Clipped to the axes — it used to run to the image edge.
+        ax.axhline(2.5, color="black", lw=0.8, ls="--", clip_on=True)
+    axes[0].set_yticks(ypos)
+    axes[0].set_yticklabels([r[0] for r in rows], fontsize=8)
 
-    # The three method effects are slivers at this scale. An inset shows they
-    # are real without letting them claim visual parity with the other two.
-    # Placed right of the group label, which it used to sit on top of.
-    inax = ax.inset_axes([0.58, 0.055, 0.33, 0.30])
-    inax.barh(np.arange(3), vals[:3], color=cols[:3], height=0.6)
-    inax.set_yticks(np.arange(3))
-    inax.set_yticklabels(["inter.", "weight.", "aggr."], fontsize=6.5)
-    inax.tick_params(labelsize=6.5, length=2)
-    inax.set_xlim(0, vals[:3].max() * 1.35)
-    inax.set_title("method effects, magnified", fontsize=7, fontweight="normal", pad=3)
-    inax.grid(True, axis="x", lw=0.3)
-    for s in inax.spines.values():
-        s.set_linewidth(0.5)
+    axes[0].annotate("choices the comparative\nliterature argues about",
+                     xy=(0.30, 0.16), xycoords="axes fraction", fontsize=8,
+                     color="0.30", va="center")
+    axes[0].annotate("upstream data and scoring",
+                     xy=(0.30, 0.80), xycoords="axes fraction", fontsize=8,
+                     color="0.30", va="center")
 
-    ratio = max(vals) / vals[:3].max()
-    ax.set_title("What actually moves the result")
-    fig.text(0.5, -0.06,
-             f"The largest method effect is {vals[:3].max():.3f} pp. The rainfall "
-             f"scoring function moves the answer {ratio:.0f}x further.\n"
-             "The soil legend bar is an error correction, not an alternative — "
-             "it is shown to scale the others against, not as a modelling choice.",
-             ha="center", va="top", fontsize=8, color="0.25")
+    _panel_letters(axes, offset=(-0.02, 1.04))
+    fig.suptitle("What moves the result depends on which class you look at", y=1.00)
     fig.tight_layout()
-    _save(fig, 12, f"effect magnitudes (method max {vals[:3].max():.3f} pp vs "
-                   f"rainfall {rain_eff:+.1f} pp)")
-    return {"aggregation_pp": round(agg, 3), "weighting_pp": round(wgt, 3),
-            "interaction_pp": round(inter, 3),
-            "rainfall_scoring_pp": round(rain_eff, 2),
-            "soil_legend_pp": round(soil_eff, 2),
-            "ratio_largest_to_method": round(ratio, 1)}
+    _save(fig, 12, f"effect magnitudes, High and Low "
+                   f"(aggregation {_mn(agg_h, '+.2f')} / {_mn(agg_l, '+.2f')} pp)")
 
-
+    bands = ", ".join(f"≤{b:.0f}→{s:.2f}" for b, s in RAINFALL_FIXED_BANDS[:-1])
+    return {
+        "high_aggregation_pp": round(agg_h, 3), "low_aggregation_pp": round(agg_l, 3),
+        "high_weighting_pp": round(wgt_h, 3), "low_weighting_pp": round(wgt_l, 3),
+        "high_interaction_pp": round(int_h, 3), "low_interaction_pp": round(int_l, 3),
+        "high_rainfall_pp": round(rain["High"] - base["High"], 2),
+        "low_rainfall_pp": round(rain["Low"] - base["Low"], 2),
+        "high_soil_pp": round(base["High"] - soil["High"], 2),
+        "low_soil_pp": round(base["Low"] - soil["Low"], 2),
+        "CAPTION": (
+            "Lower three bars are factorial main effects (interaction = half the "
+            "difference of simple effects). The rainfall bar is a ONE-AT-A-TIME "
+            "swap evaluated under AHP+WLC, not a main effect, and its size "
+            f"depends on the band set used: {bands}, >1500→1.00. Those bands are "
+            "one alternative, not a range; Chandrapur's 1,189-1,714 mm spread "
+            "falls in the top three, which is why the effect is large. The soil "
+            "bar (hatched) is a data-error correction, not a modelling choice, "
+            "and is shown to scale the others against."),
+    }
 # ─────────────────────────────────────────────────────────────────────────────
 # Figure 13 — distributions and class flows, WLC versus TOPSIS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1331,7 +1417,7 @@ def main() -> None:
         out = FIGURES[n](ctx)
         if out:
             notes[n] = out
-    print(f"\nWrote {len(wanted)} figure(s) to {OUTDIR}/ as PDF + PNG at {args.dpi} dpi.")
+    print(f"\nWrote {len(wanted)} figure(s) to {OUTDIR}/ as PNG at {args.dpi} dpi.")
     if notes:
         print("\nValues computed while plotting (for caption checking):")
         for n, d in notes.items():

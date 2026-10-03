@@ -1,0 +1,8 @@
+measure,value
+spearman_rho,0.9643
+class_agreement_fixed_pct,87.16
+class_agreement_matched_pct,90.1
+matched_breakpoint_low,0.5998
+matched_breakpoint_high,0.8452
+recovered_pp,2.93
+recovered_share_of_disagreement,0.229
