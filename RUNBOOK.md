@@ -59,7 +59,15 @@ venv\Scripts\python.exe exports.py
 | `python tools/paper_figures.py` | Every number and figure dataset cited in the paper, by section | — (stdout) | ~25 s |
 | `python tools/paper_figures.py --csv-dir DIR` | Same, plus machine-readable CSVs per section | 12 CSVs → DIR | ~30 s |
 | `python tools/ahp_audit.py` | AHP matrix audit: consistency diagnostic, perturbation, Monte Carlo | — (stdout) | ~70 s |
-| `python tools/smoke_test.py` | End-to-end app test: loads the script, runs the analysis, switches scenario and algorithm, clicks every button | — (exit 0/1) | ~40 s |
+| `python tools/smoke_test.py` | End-to-end app test: loads the script, runs the analysis, switches scenario and algorithm, clicks every button. **Run as `PYTHONPATH=. venv\Scripts\python.exe -P tools/smoke_test.py`** or app.py cannot import `gis_analysis` | — (exit 0/1) | ~40 s |
+| `python -P tools/make_figures.py [--only N]` | The 17 generated paper figures | PNG → `outputs/figures/` | ~1–2 min |
+| `python -P tools/build_figure_data.py` | Figure datasets and captions, then the figures | `FIGURE_DATA.md` + PNGs | ~2 min |
+| `python -P tools/validate_mgnrega.py` | Agreement of all 20 surfaces with MGNREGA water works, plus the CGWB comparison (seed 42) | `outputs/validation/` + `fig_val_roc/scores/gain.png` | ~1.5 min |
+| `python -P tools/prep_map_layers.py` | Inputs for the QGIS figures (outlines, grid window, scores, method maps, consensus) | `outputs/figures/qgis/inputs/` | ~1 min |
+| `"C:\Program Files\QGIS 3.44.8\bin\python-qgis-ltr.bat" -P tools/qgis_figures.py <fig01\|fig03\|fig04\|fig07\|fig20\|hydrology\|fig_val_map>` | QGIS-rendered map and diagram figures; **runs in QGIS's Python, not the venv** | PNG + editable `.qgz` | ~20 s each |
+| `python tools/pull_mgnrega.py` | Re-pulls the Bhuvan geotags (already saved; do not re-run without need) | `data/raw/mgnrega/` | ~2 min |
+| `python -P tools/inspect_mgnrega.py` / `inspect_mgnrega_2.py` | Inspection reports and the 240-photo audit sample | `reports/` | <1 min |
+| `python -P tools/build_structure_layer.py` | Photo-confirmed structures and thumbnails for the web map | `reports/photo_audit/map_layer/` (git-ignored) | <1 min |
 | `python setup_data.py` | Standardises QGIS export filenames | ⚠ **renames files in `data/`** | — |
 
 ### Useful flags
