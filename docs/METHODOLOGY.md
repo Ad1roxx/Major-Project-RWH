@@ -123,7 +123,11 @@ both runoff surfaces changed.
 
 ## 4. Land use / land cover — categorical lookup
 
-MODIS MCD12Q1, IGBP `LC_Type1`. All 17 classes are tabulated so the table
+MODIS MCD12Q1 **v6.1 (collection 061), 2024 product**, IGBP `LC_Type1`, 500 m
+(0.004167°), clipped to the district bounding box via NASA AppEEARS (request
+`aid0001`). The original download,
+`Downloads/MCD12Q1.061_LC_Type1_doy2024001000000_aid0001.tif` (md5 `a5637e89…`),
+is identical cell for cell to `data/lulc.tif` (verified 2026-10-20). All 17 classes are tabulated so the table
 transfers to other districts; 11 occur in Chandrapur.
 
 | Code | Class | Score | Reasoning |

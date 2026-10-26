@@ -11,6 +11,424 @@ GIS* — Chandrapur district, Maharashtra, India. BTech major project, Group 11.
 
 ---
 
+> # ⚠ RESULT NUMBERS SUPERSEDED — 2 October 2026
+>
+> This document was audited on 2026-08-26, **before** the soil texture legend
+> was found to be wrong. Three of the four SoilGrids class codes present in the
+> district were mapped to the wrong texture, and the dominant class — 77.8% of
+> the district — was scoring 1.00 as Silt Loam when it is Clay Loam. Full
+> record: `docs/SOIL_LEGEND_CORRECTION.md` and `CHANGELOG.md` 2026-10-02.
+>
+> **Everything in §0.1's [CODE] and [INFER] tiers still holds** — the method,
+> the file and function index, the criticisms, the structure of the argument.
+> **Every [RUN] number that depends on the soil criterion does not.** That is
+> most of §16–§18 and the abstract headline in §25.
+>
+> ## Corrected headline figures [RUN, 2026-10-02]
+>
+> | | This document says | **Current** |
+> |---|---|---|
+> | High suitability | 18.51% — 2,112.6 km² | **6.44% — 735.0 km²** |
+> | Medium | 54.79% | **52.48%** |
+> | Low | 26.70% | **41.08%** |
+> | Mean composite score | 0.7294 | **0.6733** |
+> | Mean soil criterion score | 0.9080 | **0.5428** |
+> | Most influential criterion (±20%) | drainage | **soil** (1.42 pp) |
+>
+> ## The abstract headline in §25 is wrong as written
+>
+> It claims aggregation moves highly-suitable **area** by ~5 pp. After the
+> correction the factorial main effects on High-class area are **−0.957 pp**
+> (aggregation) against **−0.560 pp** (weighting) — a ratio of under 2×, not
+> 26×. Note these are main effects; the simple effects quoted in `CLAUDE.md`
+> (0.79 pp and 0.40 pp) are a different quantity. The finding survives, but
+> **on ranking, not area**: TOPSIS retains **5/10** of the baseline shortlist
+> and 87.2% class agreement, Fuzzy-AHP + WLC retains **10/10** at 99.0%.
+> Restate it that way.
+>
+> ## Factorial effects on both class shares [RUN, `tools/make_figures.py` fig 12]
+>
+> Measured on the shares produced by the fixed 0.65/0.85 breakpoints. The
+> interaction follows the Yates convention — half the difference of the simple
+> effects — so differencing the two slopes in Figure 11 gives twice it.
+>
+> **Recomputed 2026-10-03 from unrounded shares.** The values below replace an
+> earlier set that differenced `_area_statistics`'s 2-dp display field, which
+> quantised every effect to 0.01 pp — the Low-class effects came out as
+> +9.030, −0.100 and 0.000, three values ending in a zero they had not earned.
+> All shares now come from `gis_analysis.class_share_pct`.
+>
+> | Factor | High-class share | Low-class share |
+> |---|---|---|
+> | Rainfall scoring: percentile → fixed bands ¹ | **+31.21 pp** | **−39.51 pp** |
+> | Weighting JUDGEMENTS: range over 5 scenarios ² | **range 16.23 pp** | **range 24.83 pp** |
+> | Soil legend corrected (data error, not a choice) | **−12.07 pp** | **+14.38 pp** |
+> | Aggregation: WLC → TOPSIS | −0.957 pp | **+9.032 pp** |
+> | Weighting METHOD: AHP → Fuzzy-AHP | −0.560 pp | −0.103 pp |
+> | Interaction | −0.162 pp | +0.005 pp |
+>
+> ² A RANGE (max − min), not a directional change, and not the same kind of
+> quantity as the pairwise effects beside it — it would grow if more scenarios
+> were added. It sizes the weighting judgements; do not difference it.
+>
+> ¹ A one-at-a-time swap evaluated under AHP+WLC, **not** a factorial main
+> effect, and its size depends on the band set used (≤500 mm → 0.20 through
+> >1,500 mm → 1.00, defined as `RAINFALL_FIXED_BANDS` in
+> `tools/paper_figures.py`). Chandrapur's 1,189–1,714 mm spread falls entirely
+> in the top three bands, which is why the effect is large.
+>
+> **The ordering is the same in both classes** — rainfall, soil, aggregation,
+> weighting, interaction. What changes between them is only the magnitude of
+> the aggregation effect, 0.96 pp on High against 9.03 pp on Low. Do not write
+> that the ranking of drivers depends on the class.
+>
+> ## Figure-derived results added 2026-10-03 [RUN]
+>
+> All from `python tools/make_figures.py`, which prints every value it plots.
+>
+> ### Say this in the Methods: shares are area-weighted
+>
+> Every class share in this project is **area-weighted, not a cell count**, and
+> comes from `gis_analysis.class_share_pct`. The analysis grid is EPSG:4326, so
+> a cell's ground area falls with latitude — across Chandrapur the largest cell
+> is **0.81%** bigger than the smallest. The Low class sits mostly in the
+> southern half where cells are larger, so counting cells understates it by
+> about **0.05 pp**. Two figures briefly disagreed for exactly this reason
+> (41.08% against 41.04%). `tools/smoke_test.py` now asserts that every
+> reporting path — the rounded field, the exact field and the area-weighted
+> cumulative distribution — agrees to within 0.005 pp.
+>
+> ### Weighting judgements versus the weighting method — read this before §25
+>
+> These are **two different quantities** and the paper must not merge them.
+>
+> | | High-class share | Low-class share |
+> |---|---|---|
+> | Weighting **method** (AHP → Fuzzy-AHP, judgements fixed) | −0.560 pp | −0.103 pp |
+> | Weighting **judgements** (range across the 5 scenarios) | **16.23 pp** | **24.83 pp** |
+>
+> The scenario range is larger than the soil correction (12.07 pp) and about
+> 17× the aggregation effect. "Weighting barely matters" is true only of the
+> method. Fig. 12 now carries both bars on one axis so the distinction is
+> visible rather than argued.
+>
+> ### Scenario results (Fig. 15)
+>
+> | Scenario | CR | High % | Low % |
+> |---|---|---|---|
+> | Baseline (rainfall-led) ¹ | 0.0235 | 6.44 | 41.08 |
+> | Maximise recharge | 0.0044 | 2.54 | 31.19 |
+> | Community-focused | 0.0059 | 11.12 | 37.90 |
+> | Low-earthwork siting | 0.0078 | **18.77** | 16.25 |
+> | Fertile farmland | 0.0146 | 3.39 | 38.21 |
+>
+> ¹ Renamed from "Baseline (balanced)" on 2026-10-03. The baseline matrix gives
+> rainfall 0.428, more than the bottom four criteria together, so "balanced"
+> described the intent and not the vector.
+>
+> ### Criterion correlation (Fig. 19)
+>
+> Maximum |Pearson r| across all pairs of **scored** layers, over the 123,555
+> in-district cells: **r = 0.45 (rainfall–soil)**, with **ρ = 0.44** for the
+> same pair. Those two carry **0.58** of the total weight between them, so they
+> share about 20% of their variance and the model counts one signal twice to
+> that extent — real, but far from redundant. No significance tests: the cells
+> are strongly spatially autocorrelated and a p-value on n of this size would
+> be meaningless.
+>
+> Ties and concentration are **different defects** and should not be conflated.
+> Largest single tied score, as a share of in-district cells: soil **77.8%**,
+> land cover **65.6%**, drainage 11.7%, population 9.3%, slope **0.1%**,
+> rainfall 0.0%. Slope is not tied; it is *concentrated*, with **86.0%** of
+> cells above 0.90 under the anchored ramp (the 95.8% figure in Fig. 2 is the
+> min–max version that was replaced). Both pull ρ away from r, and slope
+> against land cover is where they diverge most: ρ = 0.34 against r = 0.06.
+>
+> ### Two measures that have both been called "effective weight" (Fig. 18)
+>
+> ⚠ **The level share is a mean of per-cell ratios, and is NOT reproducible
+> from the criterion means.** Combining Fig. 6's means with the weights gives
+> about 38.2% for rainfall and 30.9% for slope, against the 36.95% and 31.64%
+> Fig. 18 reports, because mean(wᵢrᵢ/V) ≠ wᵢ·mean(rᵢ)/mean(V). The same applies
+> to the Pratt index. Say so, or a reader will report it as an error.
+>
+> `sensitivity.single_parameter_sensitivity` measures contribution to the
+> score's **level** — the mean over pixels of wᵢ·rᵢ/V. It is **not** a measure
+> of influence on which cells come out High, and the paper must not present it
+> as one. `sensitivity.discrimination_weights`, added 2026-10-03, measures
+> contribution to the score's **variation** via the Pratt index
+> βᵢ·corr(rᵢ,V) with βᵢ = wᵢ·sd(rᵢ)/sd(V), which partitions var(V) and sums
+> to 100%. They disagree sharply.
+>
+> | Criterion | Assigned % | Level contribution (ratio) | Variance share % (ratio) |
+> |---|---|---|---|
+> | Rainfall | 42.85 | 36.95 (0.86×) | **71.98 (1.68×)** |
+> | Slope | 22.54 | **31.64 (1.40×)** | 9.72 (**0.43×**) |
+> | Soil texture | 15.35 | 12.47 (0.81×) | 9.75 (0.63×; exactly 0.6348 — 0.64 was double-rounded from 0.635) |
+> | Drainage density | 9.32 | 7.18 (0.77×) | 6.50 (0.70×) |
+> | Land cover | 5.97 | 7.89 (1.32×) | 0.46 (**0.08×**) |
+> | Settlement prox. | 3.97 | 3.88 (0.98×) | 1.59 (0.40×) |
+>
+> sd of the composite = 0.1242. Only defined for a linear aggregator, so
+> computed on AHP + WLC; the TOPSIS closeness coefficient is not a weighted sum.
+>
+> **Land cover is the extreme case, not slope.** Per unit of assigned weight,
+> land cover takes **1.32×** the level and **0.08×** the variance — about five
+> times less discriminating than slope's 0.43×, while also taking more of the
+> level. Slope is the better-known example because of its weight, but if the
+> text names a single criterion it should name land cover. Consistent with map
+> removal: dropping rainfall retains **0/10** sites, dropping land cover
+> retains 9/10.
+>
+> **Two caveats, both needed in the text.** The Pratt index partitions the
+> variance of the *continuous* composite, not membership of the High class,
+> which depends on the upper tail and on where the breakpoints fall — which is
+> why Fig. 17, measuring class share, ranks the criteria differently. Soil has
+> the largest ±20% perturbation effect (1.42 pp) and only 9.75% of the
+> variance; that is not a contradiction, because soil puts 77.8% of the
+> district on one tied score, so reweighting it slides a large uniform block
+> across the 0.85 breakpoint without separating anything inside it. And the
+> index is defined only for a linear aggregator, so it is computed on AHP+WLC;
+> the TOPSIS closeness coefficient is not a weighted sum.
+>
+> ### Aggregation and the breakpoints (Fig. 13)
+>
+> Cumulative share of in-district cells at or below each breakpoint, AHP
+> weighting throughout (n = 123,555):
+>
+> | | ≤ 0.65 | ≤ 0.85 |
+> |---|---|---|
+> | AHP + WLC | **41.084%** | 93.559% |
+> | AHP + TOPSIS | **50.111%** | 94.354% |
+>
+> These are area-weighted and so equal the Low share and 100 − High share that
+> Fig. 10 reports for the same surfaces. The 9.03 pp gap at 0.65 against
+> 0.80 pp at 0.85 is why the aggregation rule
+> moves the Low class an order of magnitude more than the High class. Class
+> flows, WLC → TOPSIS: Medium→Low **1,146.4 km²**, Low→Medium 116.2,
+> High→Medium 146.4, Medium→High 55.6; net Low gain 1,030.2 km² = 9.03 pp.
+> **The classifier assigns Low at score ≤ 0.65 and High at score > 0.85**
+> (`gis_analysis._classify_suitability`); every legend and label uses that
+> convention.
+>
+> ### Map removal, recomputed 2026-10-03 from unrounded shares (Fig. 17)
+>
+> `sensitivity.py` had the same defect as the factorial effects: both
+> `one_way_sensitivity` and `map_removal_sensitivity` differenced the rounded
+> `percent` field. Both now read `class_share_pct`. Change in High-class share
+> on removing each criterion, with the remaining five renormalised:
+>
+> | Criterion | Δ High (pp) | Top-10 sites retained |
+> |---|---|---|
+> | Soil texture | **+7.67** (was +7.68) | 4/10 |
+> | Drainage density | +5.12 | 3/10 |
+> | Rainfall | +2.54 | **0/10** |
+> | Settlement prox. | +0.49 | 5/10 |
+> | Land cover | −1.06 | 9/10 |
+> | Slope | −3.11 | 5/10 |
+>
+> ±20% perturbation, mean |Δ| High: soil 1.42, rainfall 1.24, slope 1.16,
+> drainage 0.61, land cover 0.27, settlement 0.08 pp. Unchanged at 2 dp.
+>
+> **A figure that did NOT change: rainfall's level contribution is 36.95%**
+> (exactly 36.9459). **At 1 dp it is 36.9, not 37.0.** The 37.0 printed until
+> 4 October 2026 was double rounding: 36.9459 → 36.95 (stored at 2 dp) →
+> 37.0. The same thing turned the 42.849% assigned weight into 42.9. Figure 18
+> now formats the unrounded `*_exact` fields from sensitivity.py. Nothing in
+> `single_parameter_sensitivity` was altered, and it is a per-cell mean of
+> ratios rather than an area share, so area-weighting does not apply to it.
+> The same holds for the Pratt index: both are per-cell statistics over the
+> composite, not shares of district area, and the paper should say so.
+>
+> ### The shortlist depends on a scarce soil class (Fig. 9) [RUN]
+>
+> **State this in the Limitations.** Soil texture class areas, in-district,
+> area-weighted:
+>
+> | Code | Texture | Score | Share | Area |
+> |---|---|---|---|---|
+> | 1 | Clay | 0.25 | 18.612% | 2,124.0 km² |
+> | 4 | Clay Loam | 0.60 | 77.825% | 8,881.7 km² |
+> | 6 | Sandy Clay Loam | 0.80 | 3.187% | 363.7 km² |
+> | 7 | **Loam** | **1.00** | **0.376%** | **42.9 km²** |
+>
+> **4 of the top 5 candidate sites sit on Loam**, the only texture scored 1.00,
+> which is 43 km² of 11,412. The top of the shortlist therefore depends on a
+> class covering under 0.4% of the district being mapped correctly — the same
+> exposure that produced the 2026-10-02 legend error. SoilGrids is 250 m,
+> resampled nearest to the ~300 m grid, so a class this small is near the
+> resolution of the input. **Robustness check for the Discussion:** rescore
+> Loam at 0.80, like Sandy Clay Loam, and report how the shortlist moves.
+>
+> ### Step classes vs ramps — the plateau needed both (Fig. 8) [RUN]
+>
+> The 973-cell plateau at exactly 1.000 is a **historical reconstruction** and
+> must never be quoted as a current result. Running the same reconstructed
+> step-class scheme on the two soil legends:
+>
+> | Soil legend | Step-class cells at exactly 1.000 |
+> |---|---|
+> | In use at the time (superseded) | **973** |
+> | Corrected (since 2026-10-02) | **1** |
+>
+> Interpolated ramps give 0 under either. The plateau required flat-topped
+> class breaks **and** a dominant soil class wrongly scored 1.00; neither alone
+> produces it. The case for ramps over step classes rests on the IQR
+> comparison in Fig. 2 and the discrimination measure in Fig. 18, both on
+> current data — not on the 973.
+>
+> ### Method disagreement is a narrow band (Fig. 22) [RUN]
+>
+> Every cell above **0.8887** is High under all 4 method combinations; no cell
+> below **0.8515** is, and below **0.8174** no combination calls any cell High.
+> Disagreement occupies **0.817–0.889** (0.033 below the 0.85 breakpoint,
+> 0.039 above) — the same mechanism Fig. 21 quantifies. Of the 25
+> candidate sites, **22 are unanimous, 2 at 3/4, 1 at 2/4**, and the three
+> non-unanimous are ranks **23 (0.8592), 24 (0.8584), 25 (0.8536)** — the
+> bottom of the list, not the top. "Scoring well is not the same as every
+> method agreeing" overstates it: scoring well is almost the same as unanimity;
+> what is unstable is scoring *just* well enough.
+>
+> ### Exact AHP weights [RUN]
+>
+> Reported to 3 dp throughout. The exact values, in case a reader recomputes:
+> slope 0.2253604, rainfall **0.4284938**, drainage 0.0931907, soil 0.1535363,
+> land cover 0.0597465, settlement 0.0396723. Note rainfall is **0.428** at
+> 3 dp — it is below 0.4285, so half-up rounding does not take it to 0.429.
+>
+> ### The shortlist depends on a scarce soil class (Fig. 9) [RUN]
+>
+> **State this in the Limitations.** Soil texture class areas, in-district,
+> area-weighted:
+>
+> | Code | Texture | Score | Share | Area |
+> |---|---|---|---|---|
+> | 1 | Clay | 0.25 | 18.612% | 2,124.0 km² |
+> | 4 | Clay Loam | 0.60 | 77.825% | 8,881.7 km² |
+> | 6 | Sandy Clay Loam | 0.80 | 3.187% | 363.7 km² |
+> | 7 | **Loam** | **1.00** | **0.376%** | **42.9 km²** |
+>
+> **4 of the top 5 candidate sites sit on Loam**, the only texture scored 1.00,
+> which is 43 km² of 11,412. The top of the shortlist therefore depends on a
+> class covering under 0.4% of the district being mapped correctly — the same
+> exposure that produced the 2026-10-02 legend error. SoilGrids is 250 m,
+> resampled nearest to the ~300 m grid, so a class this small is near the
+> resolution of the input. **Robustness check for the Discussion:** rescore
+> Loam at 0.80, like Sandy Clay Loam, and report how the shortlist moves.
+>
+> ### Step classes vs ramps — the plateau needed both (Fig. 8) [RUN]
+>
+> The 973-cell plateau at exactly 1.000 is a **historical reconstruction** and
+> must never be quoted as a current result. Running the same reconstructed
+> step-class scheme on the two soil legends:
+>
+> | Soil legend | Step-class cells at exactly 1.000 |
+> |---|---|
+> | In use at the time (superseded) | **973** |
+> | Corrected (since 2026-10-02) | **1** |
+>
+> Interpolated ramps give 0 under either. The plateau required flat-topped
+> class breaks **and** a dominant soil class wrongly scored 1.00; neither alone
+> produces it. The case for ramps over step classes rests on the IQR
+> comparison in Fig. 2 and the discrimination measure in Fig. 18, both on
+> current data — not on the 973.
+>
+> ### Method disagreement is a narrow band (Fig. 22) [RUN]
+>
+> Every cell above **0.8887** is High under all 4 method combinations; no cell
+> below **0.8515** is, and below **0.8174** no combination calls any cell High.
+> Disagreement occupies **0.817–0.889** (0.033 below the 0.85 breakpoint,
+> 0.039 above) — the same mechanism Fig. 21 quantifies. Of the 25
+> candidate sites, **22 are unanimous, 2 at 3/4, 1 at 2/4**, and the three
+> non-unanimous are ranks **23 (0.8592), 24 (0.8584), 25 (0.8536)** — the
+> bottom of the list, not the top. "Scoring well is not the same as every
+> method agreeing" overstates it: scoring well is almost the same as unanimity;
+> what is unstable is scoring *just* well enough.
+>
+> ### Exact AHP weights [RUN]
+>
+> Reported to 3 dp throughout. The exact values, in case a reader recomputes:
+> slope 0.2253604, rainfall **0.4284938**, drainage 0.0931907, soil 0.1535363,
+> land cover 0.0597465, settlement 0.0396723. Note rainfall is **0.428** at
+> 3 dp — it is below 0.4285, so half-up rounding does not take it to 0.429.
+>
+> ### Ranking against cutoffs — the cell partition (Fig. 21) [RUN]
+>
+> ⚠ **Supersedes an earlier netted version of this analysis.** Subtracting the
+> churn under share-matched cutoffs from the churn under fixed ones is NOT a
+> decomposition: they are different sets of cells, and for the Low class the
+> difference is negative (−2.970 pp), because the fixed 0.65 holds cells in Low
+> that a matched cutoff releases. **Do not write "77% of the disagreement is
+> re-ranking"** — that figure came from the netted version and treats one set as
+> a subset of the other. The correct figure is **50.3%**.
+>
+> Cutoffs matching WLC's class sizes are the quantiles of the TOPSIS surface,
+> **0.5998** and **0.8452**, against the fixed 0.65 and 0.85.
+>
+> **A three-way partition of cells**, which sums correctly by construction:
+>
+> | Category | pp of district | km² |
+> |---|---|---|
+> | Re-ranked under **both** cutoff schemes | **6.457** | **736.9** |
+> | Changes only under the **fixed** cutoffs | 6.376 | 727.7 |
+> | Re-ranked but **masked** by the fixed cutoffs | 3.445 | 393.2 |
+>
+> - robust + induced = **12.833 pp**, the area that actually changes class.
+> - robust + masked = **9.902 pp**, the area that changes under matched cutoffs.
+> - **50.3%** of what changes class changes under BOTH cutoff schemes tested (two schemes,
+>   not all possible ones).
+>
+> Per origin class (robust + induced = area leaving that class), which
+> reconciles with the Fig. 13 Sankey: High 1.283, Medium 10.533, Low 1.018,
+> summing to 12.833.
+>
+> **The cutoff asymmetry is the mechanism.** Removing the +9.027 pp Low shift
+> takes a **0.050** move of the lower cutoff; removing the −0.795 pp High shift
+> takes only **0.005**. That is why the aggregation rule appears to move the Low
+> class an order of magnitude more than the High class.
+>
+> **The breakpoint scheme is itself an analyst decision**, so the one algorithm
+> effect that looked large is substantially another analyst-decision effect.
+> Fig. 12 now carries it as its own bar: a **range over four standard
+> schemes** (fixed 0.65/0.85, equal interval, terciles by area, natural breaks)
+> of **36.43 pp** on High and **36.00 pp** on Low. The earlier single swap to
+> the 33rd/67th percentile split (+26.53 / −8.04 pp) is superseded.
+>
+> Spearman ρ = **0.9643**, a per-cell statistic over the two surfaces.
+> Shortlist retention **5/10** and **18/25**.
+>
+> ⚠ **Shortlist overlap depends on how many sites were extracted.** Candidate
+> extraction is best-per-tile with a 5 km separation rule and is **not nested**:
+> the top 10 of a 10-site run is not the first 10 of a 25-site run (5/10 against
+> 8/10). Always extract at the size being reported. `algorithms.py` and
+> Fig. 17(b) use the same rule.
+>
+> ### Edge-effect test (Fig. 14)
+>
+> Reclassification rate between AHP+WLC and AHP+TOPSIS by distance to the
+> district boundary, **area-weighted** like every other share: 0–2 km **6.48%**
+> (n = 12,654 cells), 2–5 km 6.64% (17,495), 5–10 km 8.45% (24,283),
+> 10–20 km 16.70% (35,328), >20 km **17.53%** (33,795); district overall
+> **12.83%**. That overall figure now reconciles exactly with the Sankey in
+> Fig. 13(b): 1,146 + 146 + 116 + 56 = 1,464 km² of 11,412 km² = 12.83%, so
+> 87.17% is unchanged. The rate *falls* towards the boundary (ratio 0.37×),
+> which rules out an edge artefact from rim gap-filling. It does not establish
+> a distance mechanism; the gradient is geographic.
+>
+> ### Consensus area (Fig. 16)
+>
+> Collapsed to shared categories, since the denominators differ (4 against 5):
+>
+> | | Unanimous | Half or more | Minority | Never High |
+> |---|---|---|---|---|
+> | Across 4 method combinations | **528.5 km²** | 201.8 | 60.8 | 10,621.3 |
+> | Across 5 weighting scenarios | **239.9 km²** | 333.8 | 1,893.8 | 8,944.8 |
+>
+> Same finding as Fig. 12 in map form: the scenarios scatter the High class far
+> more than the algorithms do — 1,894 km² of minority agreement against 61.
+
+---
+
 ## 0. HOW TO USE THIS DOCUMENT
 
 ### 0.1 Evidence tiers — respect these
@@ -1580,14 +1998,14 @@ Found during this audit. **Read before quoting any number from project docs.**
 
 | # | Issue | Resolution |
 |---|---|---|
-| 1 | `criteria.py` comment claims thresholds yield "31% High / 46% Medium / 23% Low" | **Stale.** Actual: 18.51 / 54.79 / 26.70 **[RUN]**. Use §16.1. |
+| 1 | `criteria.py` comment claims thresholds yield "31% High / 46% Medium / 23% Low" | **Stale.** Was 18.51 / 54.79 / 26.70; **now 6.44 / 52.48 / 41.08 [RUN, 2026-10-02]** after the soil legend correction. Use the banner at the top of this file, not §16.1. |
 | 2 | Rainfall range quoted variously as 1,140–1,823 / 1,184–1,713 / 1,189–1,714 | All three describe different domains. Whole raster incl. 0.20° buffer: 1,140–1,823. In-district: **1,189.4–1,714.3 [RUN]**. State which. |
 | 3 | Rainfall mean quoted as 1,471.9 and 1,492.9 and 1,500.3 | 1,471.9 = whole raster; **1,492.9 = district mean in the file's own metadata tag**; 1,500.3 = in-district on the analysis grid after reprojection. Prefer 1,493 mm and say "district mean". |
 | 4 | Slope max quoted as 72.4° / 72.36° / 72.21° | Source raster max = **72.21 [RUN]**. In-district max = **56.04 [RUN]**. Report the in-district figure in results. |
 | 5 | `data/dem.tif` is 100% NoData | **[RUN]** Verified empty at four windows. Unused by the pipeline. Do not cite it as the slope source without qualification (§6.6). |
 | 6 | Settlement share quoted as 6.4% (`criteria.py`) | Actual **6.6% [RUN]**. |
 | 7 | Population range 1.9–9,101 (`CLAUDE.md`) | That is the source raster. In-district: **2.81–8,506.9 [RUN]**. |
-| 8 | Soil class coding | **Unverified against SoilGrids documentation.** Explicit ⚠ in `criteria.py`. Must be a stated limitation. |
+| 8 | Soil class coding | **Resolved 2026-10-02 — it was wrong.** The original download retained a `LEGEND` metadata tag giving the standard USDA order (1=Clay … 12=Sand); `criteria.py` had assumed 1=Sand, 4=Silt Loam, 7=Silt Clay Loam. Corrected in `criteria.py` and `derived_maps.py`. Cite Hengl et al. 2017, DOI `10.1371/journal.pone.0169748`. Report the correction; it is a finding, not a limitation. |
 | 9 | The "19–34% suitable in comparable studies" comparison | [DOC] only. **Verify against the actual papers before repeating.** |
 | 10 | Per-year rainfall figures (1,220–1,260 vs 1,425–1,930 mm) | [DOC] from the original build run; not re-derived here. Re-run `build_rainfall.py` if quoting. |
 | 11 | Min–max failure statistics (97.4% / 97.7% / 973 tied pixels / 47,495→108,229) | [DOC] historical measurements; the defective code is gone. **The 108,229 and "1 pixel at max" figures ARE re-verified [RUN]**; the pre-fix figures are not re-derivable. |

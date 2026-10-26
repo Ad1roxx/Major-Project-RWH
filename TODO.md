@@ -10,6 +10,49 @@ Completed work is recorded in CHANGELOG.md, not here.
 
 ## A. Before the report / final submission
 
+> **Current focus (from 4 Oct 2026): real-world validation — A1b below.**
+> The paper items in A0 are parked until then. The validation results will add
+> a new results section and change the paper's Limitations and Conclusion, so
+> it is cheaper to edit the manuscript once, after validation.
+
+### A0. Paper — parked until validation is done
+
+All the detail is in [docs/PAPER_REVISIONS.md](docs/PAPER_REVISIONS.md) (an
+edit list for draft v3, section by section) and the 4 October 2026 CHANGELOG
+entries.
+
+1. **Cite the Loam = 1.00 ordering** with two free sources (Rawls 1982 is
+   paywalled, so it isn't used). Both checked 2026-10-04:
+   - USDA TR-55 [28], Appendix A p. A-1 (texture-based groups): Loam B >
+     Sandy Clay Loam C > Clay Loam, Clay D;
+   - FAO Training Manual No. 5, "Irrigation Methods" (Brouwer et al. 1988),
+     Annex 2 Table 7: loam 10–20 > clay loam 5–10 > clay 1–5 mm/h (table text
+     and authors confirmed by the authors; title page says "Provisional edition"
+     and shows no year, so cite 1988, the year it is usually cited with).
+   - Manual No. 1 ("Introduction to Irrigation") does NOT have this table.
+   - Scores unchanged: the ordering matches both sources.
+   Both sources checked. Add the sentence from paper_pack/DRAFTING_BRIEF.md to §4.2.
+2. **Write up the Loam robustness check.** It has been run; the numbers are in
+   PAPER_REVISIONS §0.1. High 6.44 → 6.40%; top 5 retained 2/5, top 10 6/10;
+   base rank 2 leaves the top 25, and ranks 3 and 5 fall to 17 and 16. It goes
+   in a new §5.8.6 or in §5.11.
+3. **Make Figures 1, 3, 4, 7, 18 and 20** from `docs/FIGURE_SPECS.md`.
+   - QGIS: 1, 7 and 18. Fig 18 uses `outputs/drainage_density.tif`,
+     `curve_number.tif`, `runoff_depth.tif` and `runoff_coefficient.tif`.
+   - draw.io: 3, 4 and 20.
+   - Export at 300 dpi PNG to `review_pack/figures/` and send for review.
+   - Fig 15(c) is dropped. Fig 20's box reads "15 sites picked by all 4
+     methods · 528.5 km²".
+4. **Apply the manuscript edits in PAPER_REVISIONS §2.** Search for every value
+   in §4 ("never quote as current"), including 37.0, 9.8, 42.9, 0.64, 18.51%
+   and "Silt Loam".
+5. **Find a home for generated Figs 12, 21 and 22** (suggested: a new §5.3.5,
+   "Breakpoints and analyst decisions").
+
+**Once validation exists, also update:** the Abstract and Conclusion ("no
+accuracy metric is reported"), §5.11 "No ground-truth validation", and §5.12
+Future scope, which names the inventory as the next step.
+
 ### A1. Buffered re-export of rivers and population — *deferred 2026-08-04*
 
 **Problem.** Drainage density and settlement proximity measure outward from each
@@ -47,7 +90,7 @@ with the suitability map and area statistics.
 `lulc.tif` removes the remaining rim gap-fill (2.17% / 2.03% / 1.05% / 0.11%),
 but those criteria read only the pixel under them, so accuracy is unaffected.
 
-### A1b. Digitise known RWH structures — *the highest-leverage task*
+### A1b. Digitise known RWH structures — *the highest-leverage task* · **CURRENT FOCUS**
 
 **Blocks:** AUC validation (Sprint 3) **and** all of Sprint 4 (classifier). One
 file unblocks both. Do this in the same QGIS session as A1 above.
@@ -102,14 +145,10 @@ absence of a structure does not mean a site is unsuitable, which is why
 `validation.py` samples random background points rather than treating empty
 cells as negatives.
 
-### A2. Verify the soil class coding
+### A2. ~~Verify the soil class coding~~ — resolved 2026-10-02
 
-`SOIL_TEXTURE_SCORES` uses the legend from the project's soil slide
-(1 = Sand, 4 = Silt Loam, 6 = Sandy Clay Loam, 7 = Silt Clay Loam). Standard
-SoilGrids USDA texture coding (TEXMHT) numbers classes differently
-(1 = clay … 12 = sand). **Check the exported file's metadata.** If the standard
-coding applies, remap that one dictionary in `criteria.py` — nothing else
-changes. See METHODOLOGY §3.
+The coding was wrong in three of four classes and has been corrected against
+the SoilGrids `LEGEND` tag. See `docs/SOIL_LEGEND_CORRECTION.md`.
 
 ### A3. Review assumptions with the project guide
 

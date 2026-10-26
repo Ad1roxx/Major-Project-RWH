@@ -29,7 +29,10 @@ import numpy as np
 # Level vectors are in criteria order: slope, rainfall, drainage, soil, lulc,
 # population.
 SCENARIOS: dict[str, dict] = {
-    "Baseline (balanced)": {
+    # "Baseline (rainfall-led)", not "balanced". The baseline matrix gives
+    # rainfall 0.428 — more than the bottom four criteria together — so
+    # "balanced" described the intent and not the vector.
+    "Baseline (rainfall-led)": {
         "levels": None,   # uses the hand-built baseline matrix
         "rationale": "Rainfall-led general-purpose weighting used throughout the report.",
     },

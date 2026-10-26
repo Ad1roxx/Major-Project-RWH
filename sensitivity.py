@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from gis_analysis import score_stack
+from gis_analysis import class_share_pct, score_stack
 
 DEFAULT_DELTA = 0.20
 DEFAULT_TOP_N = 10
@@ -91,7 +91,11 @@ def one_way_sensitivity(stack: dict, base_weights: dict,
     """Vary each weight by ±delta and measure how far the ranking moves."""
     baseline = score_stack(stack, base_weights, extract_sites=False, top_n=top_n)
     base_sites = baseline["top_locations_details"][:top_n]
-    base_high = baseline["area_statistics"]["classes"]["High"]["percent"]
+    # class_share_pct, not the rounded "percent" field. Differencing a share
+    # that _area_statistics has already rounded to 2 dp quantises every effect
+    # below to 0.01 pp. This was found in the factorial effects of the paper's
+    # Figure 12 and is the same defect here.
+    base_high = class_share_pct(baseline, "High")
 
     runs = []
     for criterion in sorted(base_weights, key=lambda k: -base_weights[k]):
@@ -99,7 +103,7 @@ def one_way_sensitivity(stack: dict, base_weights: dict,
             w = perturb_weights(base_weights, criterion, factor)
             res = score_stack(stack, w, extract_sites=False, top_n=top_n)
             sites = res["top_locations_details"][:top_n]
-            high = res["area_statistics"]["classes"]["High"]["percent"]
+            high = class_share_pct(res, "High")
 
             pairs, retained = _match_sites(base_sites, sites, match_km)
             max_shift = max((abs(a - b) for a, b in pairs), default=0)
@@ -113,7 +117,7 @@ def one_way_sensitivity(stack: dict, base_weights: dict,
                 "retained_pct": round(100.0 * retained / max(1, len(base_sites)), 1),
                 "max_rank_shift": max_shift,
                 "high_pct": round(high, 2),
-                "high_pct_delta": round(high - base_high, 2),
+                "high_pct_delta": round(high - base_high, 3),
             })
 
     retained_all = [r["retained_pct"] for r in runs]
@@ -125,7 +129,7 @@ def one_way_sensitivity(stack: dict, base_weights: dict,
         rows = [r for r in runs if r["criterion"] == criterion]
         if rows:
             influence[criterion] = round(
-                float(np.mean([abs(r["high_pct_delta"]) for r in rows])), 2)
+                float(np.mean([abs(r["high_pct_delta"]) for r in rows])), 3)
 
     return {
         "delta": delta,
@@ -173,7 +177,7 @@ def map_removal_sensitivity(stack: dict, base_weights: dict,
     base = score_stack(stack, base_weights, extract_sites=False, top_n=top_n)
     V = base["suitability_raster"]
     base_sites = base["top_locations_details"][:top_n]
-    base_high = base["area_statistics"]["classes"]["High"]["percent"]
+    base_high = class_share_pct(base, "High")   # unrounded; see above
     valid = ~np.isnan(V)
 
     rows = []
@@ -194,7 +198,7 @@ def map_removal_sensitivity(stack: dict, base_weights: dict,
 
         sites = res["top_locations_details"][:top_n]
         _pairs, retained = _match_sites(base_sites, sites, match_km)
-        high = res["area_statistics"]["classes"]["High"]["percent"]
+        high = class_share_pct(res, "High")
 
         rows.append({
             "criterion": criterion,
@@ -204,7 +208,7 @@ def map_removal_sensitivity(stack: dict, base_weights: dict,
             "mean_abs_change": round(float(abs_diff.mean()), 4),   # 0–1 units
             "retained": retained,
             "high_pct": round(high, 2),
-            "high_pct_delta": round(high - base_high, 2),
+            "high_pct_delta": round(high - base_high, 3),
         })
 
     rows.sort(key=lambda r: -r["sensitivity_index"])
@@ -217,7 +221,17 @@ def map_removal_sensitivity(stack: dict, base_weights: dict,
 # ─────────────────────────────────────────────────────────────────────────────
 
 def single_parameter_sensitivity(stack: dict, base_weights: dict) -> dict:
-    """Effective weight of each criterion versus its assigned (theoretical) weight.
+    """Contribution to the MEAN SCORE, against the assigned weight.
+
+    Read what this measures before quoting it. It is a level decomposition, not
+    an influence measure: a criterion scoring high across the whole district
+    contributes a large share of the score and may still separate no cells from
+    any other. For the separation question see `discrimination_weights` below,
+    which tells a different story for slope and land cover in particular.
+
+    Napolitano & Fabbri (1996) call this the effective weight, and the label is
+    kept in the returned keys for continuity with that literature, but figures
+    and text should say "contribution to mean score".
 
     The effective weight of criterion i at a pixel is the share of the final
     score that criterion actually contributed:
@@ -253,10 +267,86 @@ def single_parameter_sensitivity(stack: dict, base_weights: dict) -> dict:
             "effective_pct": round(float(eff.mean()), 2),
             "effective_sd": round(float(eff.std()), 2),
             "ratio": round(float(eff.mean()) / (100.0 * w), 3) if w > 0 else None,
+            # Unrounded, for anything that rounds again for display: 42.849
+            # stored as 42.85 then printed at 1 dp gave 42.9, not 42.8.
+            "theoretical_pct_exact": 100.0 * w,
+            "effective_pct_exact": float(eff.mean()),
         })
 
     rows.sort(key=lambda x: -x["effective_pct"])
     return {"rows": rows}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Discrimination weights — variance share, not level share
+# ─────────────────────────────────────────────────────────────────────────────
+
+def discrimination_weights(stack: dict, base_weights: dict) -> dict:
+    """How much each criterion drives VARIATION in the composite score.
+
+    `single_parameter_sensitivity` above answers a different question from the
+    one its name suggests. Its effective weight is the mean over pixels of
+    w_i·r_i / V: the share of the score's LEVEL that criterion i supplies. A
+    criterion that scores high almost everywhere supplies a lot of level and
+    separates almost nothing, and it is separation that decides which cells
+    come out High and which sites reach the shortlist.
+
+    Slope is the case in point. 95.8% of in-district cells score above 0.90 on
+    slope, so it lifts almost every pixel by about the same amount: its level
+    contribution is 1.40 times its assigned weight, the largest in the set, and
+    yet it can hardly be deciding anything.
+
+    This function measures the other thing. The baseline composite is an exact
+    linear combination, V = Σ w_i·r_i, so the standardised coefficient of V on
+    r_i is exactly β_i = w_i·sd(r_i)/sd(V), and the Pratt index
+
+        d_i = β_i · corr(r_i, V)
+
+    partitions var(V) across the criteria and sums to R² = 1 exactly. Reported
+    as a percentage it is directly comparable with the assigned weight.
+
+    Only meaningful for a linear aggregator. The TOPSIS closeness coefficient
+    is not a weighted sum, so this is computed on AHP + WLC and the comparison
+    with other algorithms is left to the class-area and ranking measures.
+
+    Pratt (1987); Thomas, Hughes & Zumbo (1998) for the index and its caveats —
+    a component can go negative under suppression, which does not arise here.
+    """
+    base = score_stack(stack, base_weights, extract_sites=False)
+    V = base["suitability_raster"]
+    rasters = stack["normalized_rasters"]
+
+    used = [c for c in base_weights if c in rasters]
+    valid = ~np.isnan(V)
+    for c in used:
+        valid &= ~np.isnan(rasters[c])
+    if not valid.any():
+        return {"rows": [], "sd_composite": None}
+
+    v = V[valid]
+    sd_v = float(v.std())
+    rows = []
+    for c in used:
+        r = rasters[c][valid]
+        w = base_weights[c]
+        beta = float(w * r.std() / sd_v) if sd_v > 0 else 0.0
+        rho = float(np.corrcoef(r, v)[0, 1])
+        pratt = 100.0 * beta * rho
+        rows.append({
+            "criterion": c,
+            "assigned_pct": round(100.0 * w, 2),
+            "mean_score": round(float(r.mean()), 4),
+            "sd_score": round(float(r.std()), 4),
+            "beta": round(beta, 4),
+            "corr_with_composite": round(rho, 4),
+            "discrimination_pct": round(pratt, 2),
+            "ratio": round(pratt / (100.0 * w), 3) if w > 0 else None,
+            "discrimination_pct_exact": float(pratt),   # see theoretical_pct_exact
+        })
+
+    rows.sort(key=lambda x: -x["discrimination_pct"])
+    return {"rows": rows, "sd_composite": round(sd_v, 4),
+            "total_pct": round(sum(r["discrimination_pct"] for r in rows), 2)}
 
 
 def summary_sentence(result: dict) -> str:

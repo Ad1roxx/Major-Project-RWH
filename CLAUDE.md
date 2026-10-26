@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+> **New session with no history of this project? Read `START_HERE.md` first**
+> (~1 min). It routes you to the right files for your task and lists what NOT
+> to read. Working on the paper's figures? `docs/FIGURE_REVIEW_PROTOCOL.md`
+> is required — six rounds of review are settled there.
+
 ## Project
 
 RWH SiteFinder selects rainwater harvesting sites in Chandrapur district,
@@ -35,7 +40,7 @@ algorithms and sensitivity cheap. Side branch: `derived_maps.py` → hydrology s
 | `gis_analysis.py` | Grid, masking, reprojection, gap fill, distance/density, overlay, classification, candidates |
 | `ahp.py` | Pairwise matrix, geometric-mean weights, consistency ratio, `SCENARIOS` presets |
 | `exports.py` | Result → CSV / GeoJSON / GeoTIFF / PNG bytes, provenance embedded |
-| `sensitivity.py` | ±delta perturbation, map removal (Lodwick), effective weights |
+| `sensitivity.py` | ±delta perturbation, map removal (Lodwick), level contribution (Napolitano & Fabbri), variance share (Pratt) |
 | `algorithms.py` | WLC/TOPSIS aggregators, Fuzzy-AHP weights, cross-algorithm comparison |
 | `validation.py` | ROC-AUC of the surface against known structures (needs data) |
 | `consensus.py` | Consensus sites (Borda) + agreement raster across algorithms/scenarios |
@@ -49,6 +54,7 @@ algorithms and sensitivity cheap. Side branch: `derived_maps.py` → hydrology s
 | `docs/PAPER_GUIDE.md` | Verified figures + plan for the research paper |
 | `CHANGELOG.md` | Dated change record (no git) · `TODO.md` backlog · `docs/SOIL_LEGEND_CORRECTION.md` |
 | `RUNBOOK.md` | Every command: purpose, outputs, runtime, troubleshooting |
+| `START_HERE.md` | Onboarding route for a fresh session · `docs/FIGURE_REVIEW_PROTOCOL.md` the figure standard |
 | `data/boundary.geojson` | District polygon, EPSG:4326. Study-area mask |
 | `data/rivers.geojson` | HydroRIVERS, 776 features, 2,768 km, `ORD_STRA` 1–7 |
 | `data/rainfall.tif` | Mean annual mm/yr, 1,184–1,713. Built from the 11 `chirps-v3.0.YYYY.tif` globals |
@@ -62,6 +68,13 @@ algorithms and sensitivity cheap. Side branch: `derived_maps.py` → hydrology s
 - **Resampling** bilinear for continuous, nearest for categorical — averaging class codes invents classes.
 - **NoData** `-9999`, float32, deflate. CHIRPS ships `-9999` *undeclared*. Gaps inside the district are nearest-filled.
 - **Coverage gate** pixel scored only if ≥80% of total AHP weight has data (`MIN_WEIGHT_COVERAGE`).
+- **Class breaks** Low is score **≤ 0.65**, High is **> 0.85** (`_classify_suitability`).
+  Every legend, label and caption uses that convention.
+- **Class shares** are **area-weighted, not cell counts** — EPSG:4326 cells shrink
+  with latitude, 0.81% across the district. Read every share through
+  `gis_analysis.class_share_pct`, and anything that SUBTRACTS two shares must use
+  `percent_exact`; the rounded `percent` field quantises differences to 0.01 pp.
+  `tools/smoke_test.py` asserts all paths agree.
 - **Scoring** belongs in `criteria.py`; never inline thresholds elsewhere. `data/`
   uses fixed short names; generated rasters carry provenance in tags.
 - **Outputs** to `outputs/` (gitignored). `data/*.tif` gitignored; the two `.geojson` tracked.
@@ -81,7 +94,7 @@ python sensitivity.py                      # verified — 3 analyses, ~3.7 s
 python algorithms.py                       # verified — compares all 4 algorithms, ~2.8 s
 python consensus.py [--write]              # verified — consensus both axes, ~3 s
 python validation.py                       # verified — reports missing_data until structures exist
-python tools/smoke_test.py                 # verified — 11 checks, ~40 s
+python tools/smoke_test.py                 # verified — 14 checks, ~60 s
 python tools/paper_figures.py [--csv-dir D] # verified — all paper numbers, ~25 s
 python tools/ahp_audit.py                  # verified — matrix audit, ~70 s
 ```
@@ -102,9 +115,18 @@ Collection protocol: `docs/VALIDATION_PROTOCOL.md`.
 
 Baseline (AHP+WLC): High **6.44%** (735 km²) / Medium 52.5% / Low 41.1%; sites
 0.957 → 0.854. Sensitivity ±20%: 88% of top-10 kept, max shift 3; soil most
-influential. **Aggregation dominates weighting on RANKING, not area**:
+influential. Weighting JUDGEMENTS span **16.23 pp** on High across the 5
+scenarios — an order of magnitude more than the weighting METHOD (0.560 pp).
+Never merge the two. Rainfall carries **72%** of the variance in the composite
+(Pratt); slope supplies 1.40× its weight in LEVEL and 0.43× in VARIANCE. **Aggregation dominates weighting on RANKING, not area**:
 WLC→TOPSIS keeps 5/10 sites (87% class agreement, ρ 0.964), AHP→Fuzzy-AHP keeps
-10/10 (99%); the area gap is only 0.79 pp vs 0.40 pp. Consensus: 15/35 sites by
+10/10 (99%); the area gap is only 0.79 pp vs 0.40 pp. **The +9.03 pp Low shift
+is a CUTOFF artefact** — removing it takes a 0.050 move of the lower cutoff
+against 0.005 for High — and only **50.3%** of the 12.83% of area that changes
+class changes under BOTH cutoff schemes tested (fig 21, a three-way cell partition;
+an earlier netted version said 77% and was wrong). The cutoff scheme is itself
+an analyst decision and is now a bar in fig 12: a range of 36.43 pp on High
+across four standard schemes. Consensus: 15/35 sites by
 all 4 algorithms (528 km²); 2/61 by all 5 scenarios.
 
 ⚠ **Soil legend corrected 2026-10-02** — dominant class is Clay Loam, not Silt

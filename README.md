@@ -54,9 +54,11 @@ reclassification tables; the two are combined by Weighted Linear Combination.
 │   ├── PAPER_DATA_HANDOFF.md      ← Numbers handed to the paper draft
 │   ├── RESEARCH_CONTEXT.md        ← Full audited context, fact-vs-inference tagged
 │   ├── FIGURE_SPECS.md            ← The five figures built outside this repo
+│   ├── FIGURE_REVIEW_PROTOCOL.md  ← How the figures are reviewed; settled decisions
 │   ├── presentation/      ← Deck, speaker notes, full project documentation
 │   └── archive/           ← Superseded documents. Do not cite — see its README
 │
+├── START_HERE.md          ← Read first if you are new to this repo
 ├── README.md              ← This file
 ├── RUNBOOK.md             ← Every command, with troubleshooting
 ├── CHANGELOG.md           ← Dated record of changes

@@ -201,8 +201,12 @@ def section_6(ctx, csv_dir=None):
     total = int(both.sum())
     down = int((both & (ct < cw)).sum())
     up = int((both & (ct > cw)).sum())
-    print(f"\nunchanged {unchanged:,}/{total:,} = {100 * unchanged / total:.2f}%   "
-          f"reclassified {100 * (total - unchanged) / total:.2f}%")
+    # Shares by AREA, like every class share in the project; a cell count gives
+    # 87.16 against the area-weighted 87.17 the figures report.
+    _area = ctx[4]
+    unch_pct = 100 * float(_area[both & (cw == ct)].sum() / _area[both].sum())
+    print(f"\nunchanged {unchanged:,}/{total:,} cells; by area {unch_pct:.2f}%   "
+          f"reclassified {100 - unch_pct:.2f}%")
     print(f"moved down a class: {down:,}   moved up: {up:,}   crossed two classes: "
           f"{int((both & (np.abs(ct - cw) == 2)).sum()):,}")
     _emit_csv(csv_dir, "transition_matrix.csv", "from_class,to_class,cells,km2", rows)
@@ -299,7 +303,12 @@ def section_8(ctx, csv_dir=None):
         print(f"   n {a.size:,}   min {a.min():.4f}   max {a.max():.4f}   mean {a.mean():.4f}")
         print(f"   distinct values {len(np.unique(np.round(a, 6))):,}   "
               f"cells at exactly 1.000: {int((np.abs(a - 1.0) < 1e-9).sum()):,}")
-        print(f"   High (> {C.SUITABILITY_THRESHOLDS[1]}): {100 * (a > C.SUITABILITY_THRESHOLDS[1]).mean():.2f}%\n")
+        # Area-weighted, like every class share (a cell count gives 6.45%
+        # against the 6.44% reported everywhere else for the same surface).
+        okc = mask & ~np.isnan(s)
+        hi = 100 * float(_area[okc & (s > C.SUITABILITY_THRESHOLDS[1])].sum()
+                         / _area[okc].sum())
+        print(f"   High (> {C.SUITABILITY_THRESHOLDS[1]}), by area: {hi:.2f}%\n")
 
     edges = np.linspace(0, 1, HIST_BINS + 1)
     hs, _ = np.histogram(s_step[mask & ~np.isnan(s_step)], bins=edges)
@@ -588,7 +597,7 @@ def section_16(ctx, csv_dir=None):
     total = 1 + (len(ow["runs"]) + 1) + (len(mr["rows"]) + 1) + 1 + n_alg * 2 + n_scn
     print(f"\n  total distinct pipeline scorings: {total}")
     print(f"  perturbation runs (12+6+6)      : {len(ow['runs']) + len(mr['rows']) + len(sp['rows'])}")
-    print("\n  software checks: 11 smoke-test assertions, 5 AUC analytic cases,")
+    print("\n  software checks: 14 smoke-test assertions, 5 AUC analytic cases,")
     print("  3 internal cross-checks (area 99.7%, river length 0.08%, rainfall +/-20%)")
     print("\n  NONE of these are validation tests. They test internal behaviour and")
     print("  software correctness, not agreement with observed structures.")
@@ -990,31 +999,39 @@ def section_20(ctx, csv_dir=None):
     t_high = float(np.quantile(b, 1 - share_high))
     matched = np.where(b <= t_low, 1, np.where(b <= t_high, 2, 3))
 
-    fixed_agree = 100 * float((cw[both] == ct[both]).mean())
-    match_agree = 100 * float((cw[both] == matched).mean())
-    recovered = match_agree - fixed_agree
-    disagreement = 100 - fixed_agree
+    # AREA-weighted, and a three-way PARTITION of cells. The earlier version
+    # netted two agreement rates ("recovered by matching") and printed a
+    # verdict that the disagreement was mostly a genuine ranking difference.
+    # Netting two totals over different sets of cells is not a decomposition;
+    # Figure 21 (tools/make_figures.py) partitions the cells instead.
+    aa = area[both]
+    tot = float(aa.sum())
+    ch_fixed = cw[both] != ct[both]
+    ch_match = cw[both] != matched
+    pct = lambda sel: 100.0 * float(aa[sel].sum()) / tot
+    robust, induced, masked = (pct(ch_fixed & ch_match), pct(ch_fixed & ~ch_match),
+                               pct(~ch_fixed & ch_match))
+    fixed_agree = 100.0 - (robust + induced)
+    match_agree = 100.0 - (robust + masked)
 
     print(f"  Spearman rho between the surfaces      : {rho:.4f}")
     print(f"  class agreement, fixed 0.65 / 0.85     : {fixed_agree:.2f}%")
     print(f"  class agreement, quantile-matched      : {match_agree:.2f}%")
     print(f"    (matched breakpoints: {t_low:.4f} / {t_high:.4f})")
-    print(f"  disagreement at fixed breakpoints      : {disagreement:.2f} pp")
-    print(f"  recovered by matching                  : {recovered:.2f} pp "
-          f"= {100 * recovered / disagreement:.0f}% of it")
-
+    print(f"  changes under BOTH schemes (re-ranked)  : {robust:.3f} pp")
+    print(f"  changes under fixed cutoffs only        : {induced:.3f} pp")
+    print(f"  changes under matched cutoffs only      : {masked:.3f} pp")
+    print(f"  share of fixed-cutoff changes that also change when matched: "
+          f"{100 * robust / (robust + induced):.1f}%")
     print()
-    if recovered / disagreement > 0.5:
-        print("  VERDICT: mostly a THRESHOLD ARTEFACT. Report the comparison on")
-        print("  matched breakpoints or on rank overlap, not on fixed ones.")
-    else:
-        print("  VERDICT: mostly a GENUINE RANKING DIFFERENCE. Matching the")
-        print("  breakpoints recovers only a minority of the disagreement, so the")
-        print("  two methods really do order cells differently — the fixed")
-        print("  breakpoints are not what is driving the Medium-to-Low migration.")
-        print("  State the test and its result; do not leave it as an open")
-        print("  objection, and do not over-correct by claiming the comparison is")
-        print("  invalid.")
+    print("  READING: the Low-class SHARE shift (+9.03 pp) is a cutoff effect -")
+    print("  matching the class sizes removes it by construction. The cell-level")
+    print("  disagreement is about half re-ranking and half cutoff-induced, under")
+    print("  the two schemes tested. See Fig. 21; do not quote a netted figure.")
+    print("  Matched cutoffs here are cell quantiles; Fig. 21 matches by AREA and")
+    print("  gives 6.457 / 6.376 / 3.445. Quote Fig. 21's values.")
+    recovered = match_agree - fixed_agree
+    disagreement = 100.0 - fixed_agree
 
     rows = [["spearman_rho", round(rho, 4)],
             ["class_agreement_fixed_pct", round(fixed_agree, 2)],

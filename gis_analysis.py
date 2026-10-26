@@ -391,7 +391,21 @@ def _classify_suitability(suitability: np.ndarray) -> np.ndarray:
 
 
 def _area_statistics(classified: np.ndarray, transform, shape) -> dict:
-    """Area (km²) and share (%) of the district in each suitability class."""
+    """Area (km²) and share (%) of the district in each suitability class.
+
+    Shares are **area-weighted, not cell counts.** The analysis grid is in
+    EPSG:4326, so a cell's ground area shrinks with latitude: across Chandrapur
+    the largest cell is 0.81% bigger than the smallest. The Low class sits
+    mostly in the southern half, where the cells are larger, so counting cells
+    understates it by about 0.05 pp. Every reported share must come from here
+    (or from `class_share_pct`), never from a mean over a boolean mask.
+
+    `percent` is rounded to 2 dp for display. **`percent_exact` is not**, and
+    anything that subtracts two shares must use it: the factorial effects in
+    the paper's Figure 12 were quantised to 0.01 pp for a while because they
+    differenced the rounded field, which is how "+9.030 pp" and "-0.100 pp"
+    came to end in a zero they had not earned.
+    """
     px_area = _pixel_area_km2_per_row(transform, shape)          # per row
     area_grid = np.repeat(px_area[:, None], shape[1], axis=1)    # full grid
 
@@ -402,12 +416,39 @@ def _area_statistics(classified: np.ndarray, transform, shape) -> dict:
     for code, label in ((3, "High"), (2, "Medium"), (1, "Low")):
         sel = valid & (classified == code)
         km2 = float(area_grid[sel].sum())
+        pct = (100.0 * km2 / total_km2) if total_km2 > 0 else 0.0
         stats["classes"][label] = {
             "area_km2": round(km2, 1),
-            "percent": round(100.0 * km2 / total_km2, 2) if total_km2 > 0 else 0.0,
+            "percent": round(pct, 2),
+            "percent_exact": pct,
             "pixels": int(sel.sum()),
         }
     return stats
+
+
+def class_share_pct(result: dict, klass: str) -> float:
+    """The single source of truth for "x% of the district is <class>".
+
+    Full precision, area-weighted. Figures, tables, captions and
+    `docs/RESEARCH_CONTEXT.md` all read shares through this, so they cannot
+    report different numbers for the same surface. `tools/smoke_test.py`
+    asserts the agreement.
+    """
+    return float(result["area_statistics"]["classes"][klass]["percent_exact"])
+
+
+def area_weighted_ecdf(values: np.ndarray, areas: np.ndarray):
+    """(sorted values, cumulative % of district area at or below each).
+
+    The area-weighted counterpart of a plain ECDF, so that a curve's height at
+    a class breakpoint equals the share `class_share_pct` reports. An unweighted
+    ECDF is off by the same ~0.05 pp as a cell count, which is visible when a
+    reader checks one figure against another.
+    """
+    order = np.argsort(values, kind="mergesort")
+    v = values[order]
+    a = areas[order]
+    return v, 100.0 * np.cumsum(a) / a.sum()
 
 
 def _percentile_rank(data: np.ndarray) -> np.ndarray:
