@@ -1,0 +1,10 @@
+step,rule,n_remaining,n_removed
+1,"raw records loaded (both stages, 15 blocks)",82289,0
+2,missing or zero coordinates dropped,82289,0
+3,"outside the GADM district boundary (points already EPSG:4326, the project CRS)",81650,639
+4,"work status = completed: no status field; stages 0 and 3 are both existing/completed assets, so nothing is removed",81650,0
+5,"water-harvesting category segments only: WC, WH",8243,73407
+6,exact duplicate coordinates dropped,8222,21
+7,within one raster cell (same or adjacent cell) of a point already kept; earliest geotag kept,3135,5087
+8,on a nodata cell of the baseline surface,3135,0
+9,photo-audited and NOT a harvesting structure under the protocol's strict rule (both labellers storage/recharge),3119,16

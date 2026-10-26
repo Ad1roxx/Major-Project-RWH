@@ -1,0 +1,419 @@
+sl,taluka,village,lon,lat,type
+1,Ballarpur Nandgaon,Pode (CT),79.2985,19.8933,Percolation Tank
+2,Ballarpur Visapur,(CT),79.32582,19.87729,Percolation Tank
+3,Ballarpur Ballarpur,(M Cl),79.35441,19.83171,Percolation Tank
+4,Ballarpur,Kinhi,79.4828,19.82082,Percolation Tank
+5,Ballarpur,Kawadjai,79.49669,19.85595,Percolation Tank
+6,Ballarpur,Lawari,79.40026,19.83868,Percolation Tank
+7,Ballarpur,Ashti,79.41137,19.8206,Percolation Tank
+8,Ballarpur Haran,Payali,79.50954,19.82697,Percolation Tank
+9,Ballarpur,Bamhani,79.38336,19.83701,Percolation Tank
+10,Bhadravati Sheloti,Alias Wagheda,79.15594,20.23028,Percolation Tank
+11,Bhadravati Sheloti,Alias Wagheda,79.15085,20.2191,Percolation Tank
+12,Bhadravati,Viloda,79.24907,20.26316,Percolation Tank
+13,Bhadravati Charur,Dharapure,79.20128,20.25578,Percolation Tank
+14,Bhadravati Chandan,Kheda,79.22765,20.25859,Percolation Tank
+15,Bhadravati Borgaon,Dhande,79.18312,20.27488,Percolation Tank
+16,Bhadravati,Dhamani,79.14958,20.24894,Percolation Tank
+17,Bhadravati,Sagara,79.16184,20.25296,Percolation Tank
+18,Bhadravati Waigaon,Tukum,79.25219,20.23666,Percolation Tank
+19,Bhadravati,Agara,79.19018,20.25632,Percolation Tank
+20,Bhadravati Tekadi,(Dixit),79.27211,20.23655,Percolation Tank
+21,Bhadravati Visapur,Raiyyatwari,79.27998,20.22493,Percolation Tank
+22,Bhadravati,Dhanoli,79.11569,20.20375,Percolation Tank
+23,Bhadravati Dongargaon,Khardi,79.08006,20.22431,Percolation Tank
+24,Bhadravati Thetegaon,Rt.,79.22083,20.21096,Percolation Tank
+25,Bhadravati,Chora,79.23344,20.20491,Percolation Tank
+26,Bhadravati,Masal,79.17977,20.21324,Percolation Tank
+27,Bhadravati Kansa,Shirpur,79.10574,20.18638,Percolation Tank
+28,Bhadravati Kansa,Shirpur,79.13281,20.18225,Percolation Tank
+29,Bhadravati,Chalbardi,79.05161,20.15392,Percolation Tank
+30,Bhadravati,Naglon,79.01008,20.1405,Percolation Tank
+31,Bhadravati Shivaji,Nagar (CT),79.03553,20.13247,Percolation Tank
+32,Bhadravati,Deulwada,79.04791,20.11054,Percolation Tank
+33,Brahmapuri,Kinhi,79.90372,20.56127,Percolation Tank
+34,Brahmapuri,Chaugaon,79.87666,20.55418,Percolation Tank
+35,Brahmapuri,Jugnala,79.89793,20.5292,Percolation Tank
+36,Brahmapuri,Belpatali,79.92293,20.50059,Percolation Tank
+37,Brahmapuri Talodi,Kh,79.90464,20.49007,Percolation Tank
+38,Chandrapur,Vadholi,79.27859,20.09276,Percolation Tank
+39,Chandrapur,Vadholi,79.29179,20.06525,Percolation Tank
+40,Chandrapur,Warwat,79.33034,20.05416,Percolation Tank
+41,Chandrapur,Kitali,79.29549,20.05187,Percolation Tank
+42,Chandrapur,Sakharwahi,79.1597,20.03772,Percolation Tank
+43,Chandrapur Mhasala,Tukum,79.32061,20.041,Percolation Tank
+44,Chandrapur,Chargaon,79.21839,20.03684,Percolation Tank
+45,Chandrapur,Chargaon,79.2243,20.03804,Percolation Tank
+46,Chandrapur Durgapur,(CT),79.29769,20.01816,Percolation Tank
+47,Chandrapur Vichoda,Raiyyatwari,79.25926,20.03075,Percolation Tank
+48,Chandrapur,Morwa,79.2177,20.00899,Percolation Tank
+49,Chandrapur Gawarala,Rith,79.17834,20.01563,Percolation Tank
+50,Chandrapur,Forest,79.19917,19.98984,Percolation Tank
+51,Chandrapur,Forest,79.21341,19.99855,Percolation Tank
+52,Chandrapur,Yerur,79.17185,19.99137,Percolation Tank
+53,Chandrapur,Lakhamapur,79.26585,19.98604,Percolation Tank
+54,Chandrapur,Sonegaon,79.16815,19.97635,Percolation Tank
+55,Chandrapur,Datala,79.24834,19.96103,Percolation Tank
+56,Chandrapur,Shengaon,79.15542,19.95405,Percolation Tank
+57,Chandrapur,Shengaon,79.13851,19.95068,Percolation Tank
+58,Chandrapur,Shengaon,79.14407,19.96014,Percolation Tank
+59,Chandrapur,Mhatardevi,79.11548,19.97254,Percolation Tank
+60,Chandrapur,Sidur,79.20543,19.94367,Percolation Tank
+61,Chandrapur Ghugus,(CT),79.10818,19.95557,Percolation Tank
+62,Chandrapur,Mahakurla,79.19096,19.94769,Percolation Tank
+63,Chandrapur,Chorala,79.2735,19.9465,Percolation Tank
+64,Chandrapur,Dhanora,79.17116,19.92348,Percolation Tank
+65,Chandrapur,Pipri,79.22835,19.90693,Percolation Tank
+66,Chandrapur,Marada,79.24768,19.92118,Percolation Tank
+67,Chandrapur,Wadha,79.14581,19.92217,Percolation Tank
+68,Chandrapur,Wadha,79.14245,19.90933,Percolation Tank
+69,Chandrapur Shivanichor,(Tra from Ballarpur),79.28067,19.90515,Percolation Tank
+70,Chandrapur Chandrapur,(M Cl),79.30741,19.94584,Percolation Tank
+71,Chimur,Jawalabodi,79.50673,20.66206,Percolation Tank
+72,Chimur,Khursapar,79.47925,20.66089,Percolation Tank
+73,Chimur,Bhisi,79.42792,20.62969,Percolation Tank
+74,Chimur,Forest,79.4674,20.61572,Percolation Tank
+75,Chimur,Hirapur,79.51637,20.62676,Percolation Tank
+76,Chimur,Doma,79.49982,20.58696,Percolation Tank
+77,Chimur,Doma,79.51253,20.5766,Percolation Tank
+78,Chimur,Sawari,79.19616,20.45216,Percolation Tank
+79,Chimur,Chichghat,79.20929,20.49933,Percolation Tank
+80,Chimur,Bhiwkund,79.17233,20.47396,Percolation Tank
+81,Chimur,Makona,79.16493,20.45792,Percolation Tank
+82,Chimur Kitadi,Tukum,79.33786,20.44759,Percolation Tank
+83,Gondpipri,Fulora,79.70807,19.66349,Percolation Tank
+84,Korpana,Bharosa,79.15877,19.88563,Percolation Tank
+85,Korpana,Jaitapur,79.20311,19.88618,Percolation Tank
+86,Korpana,Erai,79.15136,19.87321,Percolation Tank
+87,Korpana,Ekodi,79.17266,19.86548,Percolation Tank
+88,Korpana,Khairgaon(gadegaon),79.14569,19.83551,Percolation Tank
+89,Korpana,Palgaon,79.14812,19.81536,Percolation Tank
+90,Korpana,Palgaon,79.16549,19.8061,Percolation Tank
+91,Korpana,Pipalgaon,79.17521,19.77548,Percolation Tank
+92,Korpana,Palezari,79.10714,19.77284,Percolation Tank
+93,Korpana Chandur,(CT),79.15669,19.74813,Percolation Tank
+94,Korpana,Khirdi,79.12775,19.73364,Percolation Tank
+95,Korpana,Thutra,79.19304,19.72259,Percolation Tank
+96,Rajura,Nirli,79.24406,19.86269,Percolation Tank
+97,Rajura,Sakhari,79.23199,19.83166,Percolation Tank
+98,Rajura,Sakhari,79.26588,19.82008,Percolation Tank
+99,Rajura Rajura,(M Cl),79.35176,19.773,Percolation Tank
+100,Rajura Dhopatala,(CT),79.34004,19.80701,Percolation Tank
+101,Rajura Chincholi,Kh.,79.25915,19.80022,Percolation Tank
+102,Rajura,Kochi,79.30302,19.71325,Percolation Tank
+103,Rajura,Bhendvi,79.22166,19.68162,Percolation Tank
+104,Rajura,Sonapur,79.20669,19.6838,Percolation Tank
+105,Rajura,Nimbala,79.23807,19.78123,Percolation Tank
+106,Rajura,Kalamana,79.24803,19.76249,Percolation Tank
+107,Rajura,Pandharpauni,79.27145,19.75148,Percolation Tank
+108,Rajura,Botgaon,79.31834,19.73738,Percolation Tank
+109,Rajura Mangi,Kh.,79.23582,19.71558,Percolation Tank
+110,Rajura Mangi,Kh.,79.24244,19.73722,Percolation Tank
+111,Rajura,Vihirgaon,79.25781,19.73711,Percolation Tank
+112,Rajura,Sakharwahi,79.32426,19.72952,Percolation Tank
+113,Rajura,Pachgaon,79.2581,19.70444,Percolation Tank
+114,Rajura,Pachgaon,79.26913,19.71809,Percolation Tank
+115,Rajura,Pachgaon,79.26205,19.69384,Percolation Tank
+116,Rajura,Pachgaon,79.27702,19.69537,Percolation Tank
+117,Rajura Mangi,Bk,79.23454,19.69176,Percolation Tank
+118,Rajura Bhurkunda,Kh.,79.25543,19.67275,Percolation Tank
+119,Rajura Bhurkunda,Kh.,79.26391,19.66944,Percolation Tank
+120,Rajura Kawathala,(Rithi),79.33911,19.68337,Percolation Tank
+121,Rajura,Yergavhan,79.28248,19.67351,Percolation Tank
+122,Warora Alpharalias,Satara,79.08745,20.43148,Percolation Tank
+123,Warora,Sumthana,79.05993,20.43798,Percolation Tank
+124,Warora,Pardi,79.15868,20.42107,Percolation Tank
+125,Warora,Pardi,79.15221,20.41366,Percolation Tank
+126,Warora,Pimpalgaon,79.17926,20.43036,Percolation Tank
+127,Warora,Nagari,78.8777,20.40601,Percolation Tank
+128,Warora,Ralegaon,79.19014,20.41657,Percolation Tank
+129,Warora,Ralegaon,79.18805,20.40623,Percolation Tank
+130,Warora,Ajangaon,78.9376,20.41143,Percolation Tank
+131,Warora Chargaon,Bk.,79.17117,20.38585,Percolation Tank
+132,Warora,Gaoshet,78.83769,20.39783,Percolation Tank
+133,Warora Wadadha,Tukum,79.14651,20.38461,Percolation Tank
+134,Warora,Waghnakh,78.8562,20.36721,Percolation Tank
+135,Warora,Pohe,79.12029,20.35561,Percolation Tank
+136,Warora,Pauni,78.837,20.33644,Percolation Tank
+137,Warora,Khekadapur,79.14041,20.34326,Percolation Tank
+138,Warora,Salori,79.08352,20.3174,Percolation Tank
+139,Warora,Wandhali,78.88187,20.29947,Percolation Tank
+140,Warora,Soit,78.82729,20.27989,Percolation Tank
+141,Warora,Nimsada,78.99264,20.27628,Percolation Tank
+142,Warora,Panzurni,78.90985,20.28386,Percolation Tank
+143,Warora,Parsoda,79.03935,20.26609,Percolation Tank
+144,Warora,Parsoda,79.05462,20.27271,Percolation Tank
+145,Warora Jamgaon,Bk,79.06502,20.2614,Percolation Tank
+146,Warora,Khanji,78.99865,20.25272,Percolation Tank
+147,Warora,Kumbhari,79.03889,20.23878,Percolation Tank
+148,Warora,Forest,79.05512,20.29161,Percolation Tank
+149,Warora Jamgaon,Bk,79.05405,20.24878,Percolation Tank
+150,Warora Sakhara,Rajapur,79.13685,20.42295,Percolation Tank
+1,Brahmapuri Torgaon,Bk.,79.76725,20.685109,Check Dam
+2,Brahmapuri,Sawalgaon,79.9227,20.594653,Check Dam
+3,Brahmapuri,Maldongri,79.88797,20.571694,Check Dam
+4,Brahmapuri Akapur,Rupala,79.88195,20.496813,Check Dam
+5,Brahmapuri,Jugnala,79.87454,20.522744,Check Dam
+6,Chimur,Shankarpur,79.52494,20.637354,Check Dam
+7,Chimur,Shankarpur,79.52703,20.653244,Check Dam
+8,Chimur,Shankarpur,79.53899,20.649116,Check Dam
+9,Chimur Chichala,Shastri,79.47099,20.646676,Check Dam
+10,Chimur,Amboli,79.48762,20.651786,Check Dam
+11,Chimur,Amboli,79.48525,20.634042,Check Dam
+12,Chimur,Amboli,79.49542,20.629499,Check Dam
+13,Chimur,Gadpipari,79.45798,20.65005,Check Dam
+14,Chimur,Asola,79.51243,20.653754,Check Dam
+15,Chimur,Asola,79.50722,20.647646,Check Dam
+16,Chimur Kanhalgaon,Brahman,79.43672,20.653613,Check Dam
+17,Chimur Kanhalgaon,Brahman,79.43926,20.639771,Check Dam
+18,Chimur Kawadsi,Deshmane,79.57136,20.627236,Check Dam
+19,Chimur,Thana,79.5122,20.641906,Check Dam
+20,Chimur,Thana,79.51114,20.624957,Check Dam
+21,Chimur,Susundi,79.54421,20.629734,Check Dam
+22,Chimur,Forest,79.46901,20.630549,Check Dam
+23,Chimur,Wagdara,79.4804,20.619549,Check Dam
+24,Chimur Lohara,Chak,79.53541,20.614862,Check Dam
+25,Chimur,Wagholi,79.4217,20.609597,Check Dam
+26,Chimur Borgaon,(Buthi),79.4351,20.592698,Check Dam
+27,Chimur Rengabodi,R,79.23842,20.511702,Check Dam
+28,Chimur,Jambhulbodi,79.23311,20.533851,Check Dam
+29,Chimur,Kesalabodi,79.21577,20.528155,Check Dam
+30,Chimur,Parsodi,79.2258,20.511794,Check Dam
+31,Chimur Amdi,Begde,79.19257,20.500424,Check Dam
+32,Chimur,Khapari,79.18622,20.479036,Check Dam
+33,Chimur,Khangaon,79.20693,20.442285,Check Dam
+34,Chimur,Khangaon,79.20783,20.457011,Check Dam
+35,Chimur Kitadi,Tukum,79.32456,20.433291,Check Dam
+36,Chimur Kitadi,Tukum,79.32119,20.439938,Check Dam
+37,Gondpipri Chak,Pipari,79.72417,19.681621,Check Dam
+38,Gondpipri Ganesh,Pipari,79.70373,19.680857,Check Dam
+39,Gondpipri Bhangram,Talodhi,79.7046,19.672969,Check Dam
+40,Gondpipri Bhangram,Talodhi,79.71896,19.672533,Check Dam
+41,Korpana,Bharosa,79.15993,19.88045,Check Dam
+42,Korpana,Jaitapur,79.21307,19.881648,Check Dam
+43,Korpana,Jaitapur,79.20612,19.87849,Check Dam
+44,Korpana Jewara,(Bhoygaon),79.19952,19.87947,Check Dam
+45,Korpana,Erai,79.15599,19.867494,Check Dam
+46,Korpana,Ekodi,79.1825,19.875115,Check Dam
+47,Korpana,Ekodi,79.17787,19.854864,Check Dam
+48,Korpana,Ekodi,79.16456,19.855844,Check Dam
+49,Korpana,Kawathala,79.16248,19.845609,Check Dam
+50,Korpana,Kawathala,79.16931,19.832653,Check Dam
+51,Korpana,Khairgaon(gadegaon),79.1619,19.829604,Check Dam
+52,Korpana,Bakhardi,79.18436,19.792259,Check Dam
+53,Korpana Awalpur,(CT),79.14013,19.789775,Check Dam
+54,Korpana,Pipalgaon,79.1788,19.784093,Check Dam
+55,Korpana Nanda,(CT),79.1487,19.772348,Check Dam
+56,Korpana Chandur,(CT),79.18088,19.735404,Check Dam
+57,Korpana Chandur,(CT),79.1707,19.724946,Check Dam
+58,Korpana Chandur,(CT),79.16745,19.756009,Check Dam
+59,Korpana,Thutra,79.18181,19.717015,Check Dam
+60,Korpana,Injapur,79.13967,19.717669,Check Dam
+61,Rajura,Sakhari,79.22317,19.810933,Check Dam
+62,Rajura,Nimbala,79.23159,19.773053,Check Dam
+63,Rajura,Kalamana,79.239,19.754423,Check Dam
+64,Rajura,Ruyad,79.31184,19.730984,Check Dam
+65,Rajura,Pachgaon,79.27084,19.701863,Check Dam
+66,Rajura,Goraj(Rith),79.31172,19.708584,Check Dam
+67,Rajura,Bhedoda,79.32426,19.684106,Check Dam
+68,Rajura,Ranvelli,79.31114,19.7017,Check Dam
+69,Rajura,Ranvelli,79.29756,19.704759,Check Dam
+70,Rajura,Ranvelli,79.30232,19.704868,Check Dam
+71,Rajura Bhurkunda,Bk,79.30209,19.690554,Check Dam
+72,Rajura Kawathala,(Rithi),79.33203,19.679845,Check Dam
+73,Warora,Yerkheda,79.14481,20.462969,Check Dam
+74,Warora,Yerkheda,79.15452,20.470676,Check Dam
+75,Warora,Susa,79.08264,20.452187,Check Dam
+76,Warora,Susa,79.07363,20.453921,Check Dam
+77,Warora,Wadgaon,79.13464,20.447371,Check Dam
+78,Warora,Wadgaon,79.12193,20.443302,Check Dam
+79,Warora,Abamakta,79.15198,20.445855,Check Dam
+80,Warora,Mokhala,79.11061,20.449587,Check Dam
+81,Warora,Kurla,78.88064,20.36558,Check Dam
+82,Warora,Kharwad,78.87694,20.357995,Check Dam
+83,Warora,Kharwad,78.89474,20.352795,Check Dam
+84,Warora,Pardi,79.15264,20.434365,Check Dam
+85,Warora,Nagari,78.85868,20.404156,Check Dam
+86,Warora,Nagari,78.86839,20.402206,Check Dam
+87,Warora,Nagari,78.87786,20.398955,Check Dam
+88,Warora Lodhi,Kheda,79.118,20.417691,Check Dam
+89,Warora,Arvi,78.95413,20.398442,Check Dam
+90,Warora,Ajangaon,78.92756,20.395625,Check Dam
+91,Warora,Ajangaon,78.93403,20.394975,Check Dam
+92,Warora,Jamkhula,78.90514,20.39397,Check Dam
+93,Warora,Ukharda,78.88249,20.390286,Check Dam
+94,Warora Borgaon,Bhosale,79.11592,20.379995,Check Dam
+95,Warora,Sonegaon,79.12752,20.372404,Check Dam
+96,Warora,Sonegaon,79.14127,20.376651,Check Dam
+97,Warora,Chikani,78.91253,20.337191,Check Dam
+98,Warora,Khemjai,79.11569,20.340486,Check Dam
+99,Warora,Jalka,78.86862,20.339792,Check Dam
+100,Warora,Ashi,78.9123,20.317391,Check Dam
+101,Warora Majara,Rai,79.03826,20.291561,Check Dam
+102,Warora Majara,Rai,79.02717,20.287413,Check Dam
+103,Warora,Madheli,78.84042,20.296474,Check Dam
+104,Warora,Madheli,78.85729,20.290406,Check Dam
+105,Warora,Madheli,78.87139,20.305392,Check Dam
+106,Warora Salori,Yensa Block,79.01769,20.293695,Check Dam
+107,Warora,Borda,79.02671,20.243872,Check Dam
+108,Warora,Nimsada,78.9925,20.29026,Check Dam
+109,Warora,Chinora,79.01454,20.264316,Check Dam
+110,Warora,Wadala,78.8763,20.331226,Check Dam
+111,Warora,Yewati,78.84739,20.358709,Check Dam
+112,Warora,Niljai,78.88415,20.27626,Check Dam
+1,Ballarpur,Amdi,79.45177,19.8035,Recharge Shaft
+2,Ballarpur,Bhivkund,79.34805,19.89473,Recharge Shaft
+3,Ballarpur,Bhivkund,79.34504,19.90365,Recharge Shaft
+4,Ballarpur Dharmashala,Tukum,79.31772,19.90125,Recharge Shaft
+5,Ballarpur Visapur,(CT),79.33485,19.88711,Recharge Shaft
+6,Ballarpur Ballarpur,(M Cl),79.36333,19.84465,Recharge Shaft
+7,Ballarpur,Kinhi,79.47492,19.83932,Recharge Shaft
+8,Ballarpur,Kawadjai,79.51405,19.83736,Recharge Shaft
+9,Ballarpur,Lawari,79.40825,19.82712,Recharge Shaft
+10,Ballarpur,Kalamna,79.43047,19.81556,Recharge Shaft
+11,Ballarpur,Palasgaon,79.48106,19.80475,Recharge Shaft
+12,Ballarpur Korti,Makta,79.4485,19.8272,Recharge Shaft
+13,Ballarpur,Kothari,79.47973,19.79061,Recharge Shaft
+14,Bhadravati,Forest,79.19133,20.12794,Recharge Shaft
+15,Bhadravati,Forest,79.16381,20.1461,Recharge Shaft
+16,Bhadravati,Forest,79.14484,20.13055,Recharge Shaft
+17,Bhadravati Shegaon,Kh.,79.17075,20.28077,Recharge Shaft
+18,Bhadravati Sheloti,Alias Wagheda,79.1416,20.2312,Recharge Shaft
+19,Bhadravati Mangli,Raiyyatwari,79.16149,20.16564,Recharge Shaft
+20,Bhadravati Mangli,Raiyyatwari,79.15779,20.17744,Recharge Shaft
+21,Bhadravati Mangli,Raiyyatwari,79.15715,20.15589,Recharge Shaft
+22,Bhadravati Chandan,Kheda,79.22997,20.25178,Recharge Shaft
+23,Bhadravati,Dhamani,79.14599,20.26495,Recharge Shaft
+24,Bhadravati,Sagara,79.16265,20.2579,Recharge Shaft
+25,Bhadravati,Sagara,79.16357,20.24063,Recharge Shaft
+26,Bhadravati,Agara,79.18092,20.25807,Recharge Shaft
+27,Bhadravati,Khokari,79.16739,20.22903,Recharge Shaft
+28,Bhadravati,Khokari,79.18312,20.22219,Recharge Shaft
+29,Bhadravati Mahadapur,Rith,79.22977,20.23864,Recharge Shaft
+30,Bhadravati,Dhanoli,79.11893,20.21709,Recharge Shaft
+31,Bhadravati,Bhatali,79.06572,20.20906,Recharge Shaft
+32,Bhadravati Bhuyari,Rt.,79.09325,20.22455,Recharge Shaft
+33,Bhadravati Dongargaon,Khardi,79.08434,20.21889,Recharge Shaft
+34,Bhadravati Dongargaon,Khardi,79.07289,20.19885,Recharge Shaft
+35,Bhadravati Ashti,Kakade,79.20521,20.21112,Recharge Shaft
+36,Bhadravati,Masal,79.17954,20.19821,Recharge Shaft
+37,Bhadravati,Masal,79.16658,20.19884,Recharge Shaft
+38,Bhadravati Ashti,Tukum,79.21215,20.19992,Recharge Shaft
+39,Bhadravati,Panwadala,79.10019,20.19832,Recharge Shaft
+40,Bhadravati Khandala,Rith,79.05369,20.17679,Recharge Shaft
+41,Bhadravati,Naglon,79.00742,20.14902,Recharge Shaft
+42,Bhadravati,Patala,79.02338,20.12968,Recharge Shaft
+43,Bhadravati,Kawadi,79.0412,20.11841,Recharge Shaft
+44,Bhadravati Bhadravati,(M Cl),79.14021,20.10494,Recharge Shaft
+45,Bhadravati,Chiparala,79.18879,20.10265,Recharge Shaft
+46,Brahmapuri Torgaon,Bk.,79.77452,20.68074,Recharge Shaft
+47,Brahmapuri,Betala,79.91321,20.56612,Recharge Shaft
+48,Brahmapuri Gawarla,Chak,79.88357,20.50258,Recharge Shaft
+49,Brahmapuri,Belpatali,79.91738,20.50745,Recharge Shaft
+50,Brahmapuri Talodi,Kh,79.88971,20.48767,Recharge Shaft
+51,Chandrapur,Vadholi,79.27511,20.09718,Recharge Shaft
+52,Chandrapur,Chincholi,79.26863,20.09146,Recharge Shaft
+53,Chandrapur,Warwat,79.33505,20.05309,Recharge Shaft
+54,Chandrapur,Kitali,79.30149,20.05805,Recharge Shaft
+55,Chandrapur,Kitali,79.2993,20.06962,Recharge Shaft
+56,Chandrapur,Padamapur,79.2986,20.04472,Recharge Shaft
+57,Chandrapur Nagpur,(Chota),79.24849,20.03639,Recharge Shaft
+58,Chandrapur Nagpur,(Chota),79.23993,20.03983,Recharge Shaft
+59,Chandrapur,Sakharwahi,79.14399,20.02351,Recharge Shaft
+60,Chandrapur,Sakharwahi,79.16471,20.03048,Recharge Shaft
+61,Chandrapur Tadali,(CT),79.20278,20.01351,Recharge Shaft
+62,Chandrapur,Sinala,79.33297,20.03652,Recharge Shaft
+63,Chandrapur,Chargaon,79.22292,20.03199,Recharge Shaft
+64,Chandrapur,Chargaon,79.21169,20.02852,Recharge Shaft
+65,Chandrapur Durgapur,(CT),79.31191,20.00935,Recharge Shaft
+66,Chandrapur Vichoda,Bk.,79.24328,20.02058,Recharge Shaft
+67,Chandrapur Gawarala,Rith,79.17836,20.01829,Recharge Shaft
+68,Chandrapur,Yerur,79.17084,19.99372,Recharge Shaft
+69,Chandrapur,Yerur,79.19144,19.98806,Recharge Shaft
+70,Chandrapur,Yerur,79.17454,19.97961,Recharge Shaft
+71,Chandrapur Urjanagar,(CT),79.31029,19.99543,Recharge Shaft
+72,Chandrapur,Khutala,79.23368,19.995,Recharge Shaft
+73,Chandrapur,Kosara,79.26053,19.98529,Recharge Shaft
+74,Chandrapur,Wandhari,79.20625,19.97559,Recharge Shaft
+75,Chandrapur,Belsani,79.12582,19.97195,Recharge Shaft
+76,Chandrapur,Chichala,79.22905,19.97053,Recharge Shaft
+77,Chandrapur,Shengaon,79.13219,19.94622,Recharge Shaft
+78,Chandrapur,Shengaon,79.15313,19.95807,Recharge Shaft
+79,Chandrapur,Shengaon,79.15857,19.95764,Recharge Shaft
+80,Chandrapur,Shengaon,79.14249,19.96548,Recharge Shaft
+81,Chandrapur,Anturla,79.19017,19.96297,Recharge Shaft
+82,Chandrapur,Sonurli,79.24178,19.95961,Recharge Shaft
+83,Chandrapur,Sidur,79.20243,19.94932,Recharge Shaft
+84,Chandrapur Ghugus,(CT),79.11355,19.95041,Recharge Shaft
+85,Chandrapur,Mahakurla,79.18137,19.9492,Recharge Shaft
+86,Chandrapur,Vendali,79.2375,19.94431,Recharge Shaft
+87,Chandrapur,Dhanora,79.17929,19.93121,Recharge Shaft
+88,Chandrapur,Dhanora,79.19375,19.92375,Recharge Shaft
+89,Chandrapur,Usgaon,79.14006,19.93458,Recharge Shaft
+90,Chandrapur,Usgaon,79.13184,19.92174,Recharge Shaft
+91,Chandrapur,Hingnala,79.26261,19.91955,Recharge Shaft
+92,Chandrapur,Pipri,79.21817,19.92021,Recharge Shaft
+93,Chandrapur,Pipri,79.21539,19.91042,Recharge Shaft
+95,Chandrapur Chandrapur,(M Cl),79.29339,19.97803,Recharge Shaft
+96,Chandrapur Chandrapur,(M Cl),79.30659,19.96737,Recharge Shaft
+97,Chimur,Khapari,79.18991,20.47282,Recharge Shaft
+98,Korpana Jewara,(Bhoygaon),79.20137,19.88388,Recharge Shaft
+99,Korpana,Ekodi,79.16769,19.86361,Recharge Shaft
+100,Korpana,Khairgaon(gadegaon),79.15657,19.82657,Recharge Shaft
+101,Korpana,Talodhi,79.18065,19.80456,Recharge Shaft
+102,Korpana,Bibi,79.16005,19.77459,Recharge Shaft
+103,Korpana,Lakhamapur,79.19975,19.75182,Recharge Shaft
+104,Korpana Chandur,(CT),79.18181,19.73875,Recharge Shaft
+105,Rajura,Marda,79.23861,19.88957,Recharge Shaft
+106,Rajura,Marda,79.24081,19.86686,Recharge Shaft
+107,Rajura,Pellora,79.23269,19.85726,Recharge Shaft
+108,Rajura,Sakhari,79.24569,19.81972,Recharge Shaft
+109,Rajura,Sakhari,79.23176,19.82496,Recharge Shaft
+110,Rajura,Sakhari,79.25404,19.81184,Recharge Shaft
+111,Rajura,Pauni,79.27087,19.82898,Recharge Shaft
+112,Rajura,Bhadangpur,79.32124,19.80069,Recharge Shaft
+113,Rajura Dhopatala,(CT),79.33923,19.79654,Recharge Shaft
+114,Rajura Chincholi,Kh.,79.25288,19.78958,Recharge Shaft
+115,Rajura,Kochi,79.30047,19.70812,Recharge Shaft
+116,Rajura,Bhendvi,79.23977,19.68426,Recharge Shaft
+117,Rajura,Kalamana,79.24016,19.75965,Recharge Shaft
+118,Rajura,Arvi,79.33575,19.76421,Recharge Shaft
+119,Rajura,Pandharpauni,79.27203,19.74629,Recharge Shaft
+120,Rajura,Botgaon,79.31567,19.73401,Recharge Shaft
+121,Rajura Mangi,Kh.,79.24011,19.72535,Recharge Shaft
+122,Rajura Mangi,Kh.,79.25358,19.73061,Recharge Shaft
+123,Rajura,Sakharwahi,79.31915,19.72582,Recharge Shaft
+124,Rajura,Pachgaon,79.2588,19.69076,Recharge Shaft
+125,Rajura,Pachgaon,79.2653,19.71469,Recharge Shaft
+126,Rajura,Pachgaon,79.27342,19.69404,Recharge Shaft
+127,Rajura,Pachgaon,79.28213,19.70929,Recharge Shaft
+128,Rajura Mangi,Bk,79.2407,19.7071,Recharge Shaft
+129,Rajura Mangi,Bk,79.25091,19.70016,Recharge Shaft
+130,Rajura,Bhedoda,79.31811,19.70058,Recharge Shaft
+131,Rajura,Bhedoda,79.32519,19.69091,Recharge Shaft
+132,Rajura Bhurkunda,Bk,79.27911,19.6787,Recharge Shaft
+133,Rajura Kawathala,(Rithi),79.33517,19.68316,Recharge Shaft
+134,Rajura Sindola,(Rithi),79.31254,19.67564,Recharge Shaft
+135,Rajura,Kawadgondi,79.24812,19.67087,Recharge Shaft
+136,Warora,Yerkheda,79.15752,20.46683,Recharge Shaft
+137,Warora,Wadgaon,79.12655,20.43908,Recharge Shaft
+138,Warora,Kharwad,78.89404,20.34543,Recharge Shaft
+139,Warora,Girola,79.1566,20.4445,Recharge Shaft
+140,Warora Alpharalias,Satara,79.08541,20.44394,Recharge Shaft
+141,Warora,Nagari,78.86076,20.41242,Recharge Shaft
+142,Warora,Ralegaon,79.19662,20.41523,Recharge Shaft
+143,Warora Lodhi,Kheda,79.12378,20.41524,Recharge Shaft
+144,Warora,Ajangaon,78.93218,20.4018,Recharge Shaft
+145,Warora,Jamkhula,78.90467,20.40591,Recharge Shaft
+146,Warora,Ukharda,78.87786,20.38597,Recharge Shaft
+147,Warora,Sonegaon,79.12701,20.38315,Recharge Shaft
+148,Warora,Jalka,78.864,20.33915,Recharge Shaft
+149,Warora,Ratnala,79.12124,20.34348,Recharge Shaft
+150,Warora,Ashi,78.90537,20.30251,Recharge Shaft
+151,Warora Salori,Yensa Block,79.00984,20.29015,Recharge Shaft
+152,Warora,Soit,78.82933,20.2882,Recharge Shaft
+153,Warora,Borgaon,78.85452,20.27628,Recharge Shaft
+154,Warora,Anandvan,79.02994,20.27628,Recharge Shaft
+155,Warora Khairgaon,Tukum,79.04196,20.28213,Recharge Shaft
+156,Warora,Mahadoli,78.89236,20.37263,Recharge Shaft
+94,Chandrapur Chandrapur,Shivanichor (Tra from Ballarpur),79.26805,19.89582,Recharge Shaft

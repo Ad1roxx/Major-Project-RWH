@@ -1,0 +1,22 @@
+{
+"type": "FeatureCollection",
+"name": "consensus_sites",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "consensus_rank": 1 }, "geometry": { "type": "Point", "coordinates": [ 79.68248, 20.36448 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 2 }, "geometry": { "type": "Point", "coordinates": [ 79.67117, 20.3023 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 3 }, "geometry": { "type": "Point", "coordinates": [ 79.43364, 20.50861 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 4 }, "geometry": { "type": "Point", "coordinates": [ 79.96526, 20.0423 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 5 }, "geometry": { "type": "Point", "coordinates": [ 79.90305, 20.17795 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 6 }, "geometry": { "type": "Point", "coordinates": [ 79.59482, 20.37861 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 7 }, "geometry": { "type": "Point", "coordinates": [ 79.46192, 20.39556 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 8 }, "geometry": { "type": "Point", "coordinates": [ 79.92284, 20.30513 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 9 }, "geometry": { "type": "Point", "coordinates": [ 79.36578, 20.42948 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 10 }, "geometry": { "type": "Point", "coordinates": [ 79.76732, 19.66642 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 11 }, "geometry": { "type": "Point", "coordinates": [ 79.82387, 20.20056 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 12 }, "geometry": { "type": "Point", "coordinates": [ 79.32619, 20.45491 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 15 }, "geometry": { "type": "Point", "coordinates": [ 79.42516, 20.42665 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 24 }, "geometry": { "type": "Point", "coordinates": [ 79.77014, 19.9349 ] } },
+{ "type": "Feature", "properties": { "consensus_rank": 29 }, "geometry": { "type": "Point", "coordinates": [ 79.5722, 20.20621 ] } }
+]
+}

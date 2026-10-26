@@ -1,0 +1,52 @@
+{
+ "methods": [
+  {
+   "code": 1,
+   "name": "AHP + WLC",
+   "high_pct": 6.440645486326479
+  },
+  {
+   "code": 2,
+   "name": "AHP + TOPSIS",
+   "high_pct": 5.645539336668491
+  },
+  {
+   "code": 3,
+   "name": "Fuzzy-AHP + WLC",
+   "high_pct": 6.042702884328541
+  },
+  {
+   "code": 4,
+   "name": "Fuzzy-AHP + TOPSIS",
+   "high_pct": 4.9241834736475125
+  }
+ ],
+ "weights": {
+  "slope": 0.22536040359342716,
+  "rainfall": 0.42849383767231136,
+  "drainage": 0.09319070826788559,
+  "soil": 0.1535362556479032,
+  "lulc": 0.05974646259300456,
+  "population": 0.03967233222546821
+ },
+ "rank1": {
+  "score": 0.9566028118133545,
+  "contrib": {
+   "slope": 0.21330319291254263,
+   "rainfall": 0.4162140984621321,
+   "drainage": 0.08287060759457848,
+   "soil": 0.1535362556479032,
+   "lulc": 0.05974646259300456,
+   "population": 0.030932251849468014
+  }
+ },
+ "consensus_sites": 15,
+ "fig12": {
+  "high_cutoff_range_pp": 36.43,
+  "high_rainfall_pp": 31.21,
+  "high_scenario_range_pp": 16.23,
+  "high_aggregation_pp": -0.957,
+  "high_weighting_pp": -0.56
+ },
+ "all4_high_km2": 528.5
+}
