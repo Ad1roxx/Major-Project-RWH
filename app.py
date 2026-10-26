@@ -10,6 +10,7 @@ import os
 import numpy as np
 from gis_analysis import build_criteria_stack, score_stack
 from utils.map_renderer import render_map
+from utils import structures as STR
 from ahp import ahp_engine, SCENARIOS
 from algorithms import ALGORITHMS, weights_for_algorithm, compare_algorithms
 import criteria as C
@@ -32,6 +33,65 @@ def _criterion_sort_key(criterion: str, weights: dict) -> tuple:
     except ValueError:
         fallback_idx = 999
     return (-w, fallback_idx, criterion)
+
+
+CRITERION_NAMES = {"slope": "Slope", "rainfall": "Rainfall", "drainage": "Drainage density",
+                   "soil": "Soil texture", "lulc": "Land cover (cropland)",
+                   "population": "Settlement proximity"}
+FARMLAND_SCENARIO = "Fertile farmland"
+
+
+def _render_scenario_priorities(scenario_name: str, scenario_matrix) -> None:
+    """What the selected scenario prioritises, against the baseline weights."""
+    weights, _cr = ahp_engine.calculate_weights(scenario_matrix)
+    base, _ = ahp_engine.calculate_weights(
+        ahp_engine.matrix_for_scenario(list(SCENARIOS)[0]))
+    is_base = scenario_name == list(SCENARIOS)[0]
+    rows = []
+    for c in sorted(weights, key=weights.get, reverse=True):
+        w, b = float(weights[c]), float(base[c])
+        change = ""
+        if not is_base and abs(w - b) >= 0.01:
+            arrow, col = ("▲", "#3fb950") if w > b else ("▼", "#f85149")
+            change = (f"<span style='color:{col};'>{arrow} from {b:.2f}</span>")
+        rows.append(
+            f"<tr><td style='padding:1px 6px 1px 0;'>{CRITERION_NAMES.get(c, c)}</td>"
+            f"<td style='text-align:right;padding:1px 6px;'><b>{w:.2f}</b></td>"
+            f"<td style='font-size:0.75rem;'>{change}</td></tr>")
+    top = [CRITERION_NAMES.get(c, c) for c in sorted(weights, key=weights.get, reverse=True)[:2]]
+    farm_note = ("<div style='color:#7d8590;margin-top:4px;'>Farmland sites also show "
+                 "the distance to existing water works and rivers, and the cropland "
+                 "around them.</div>") if scenario_name == FARMLAND_SCENARIO else ""
+    st.markdown(
+        f"<div style='font-size:0.8rem;color:#c9d1d9;margin:2px 0 6px;'>"
+        f"<b>Prioritises:</b> {top[0]}, then {top[1]}"
+        f"{'' if is_base else ' &middot; arrows compare with the baseline'}"
+        f"<table style='margin-top:4px;font-size:0.78rem;'>{''.join(rows)}</table>"
+        f"{farm_note}"
+        f"</div>", unsafe_allow_html=True)
+
+
+def _site_context_html(ctx: dict | None) -> str:
+    """Water and farmland context line for a site card (farmland scenario)."""
+    if not ctx:
+        return ""
+    bits = []
+    if "work_km" in ctx:
+        bits.append(f"nearest MGNREGA water work ({ctx['work_cat']}, unverified) "
+                    f"<b>{ctx['work_km']:.2f} km</b>")
+    if ctx.get("works_near"):
+        bits.append("check their photos: " + STR.works_links_html(ctx))
+    if "confirmed_km" in ctx:
+        bits.append(f"nearest photo-confirmed structure <b>{ctx['confirmed_km']:.1f} km</b>")
+    if "river_km" in ctx:
+        bits.append(f"nearest mapped river <b>{ctx['river_km']:.2f} km</b>")
+    farm = ""
+    if ctx.get("area_km2"):
+        pct = 100 * ctx["cropland_km2"] / ctx["area_km2"]
+        on = "on cropland" if ctx.get("on_cropland") else "not on cropland"
+        farm = (f"<br>🌾 Site {on}; cropland within {STR.FARMLAND_RADIUS_KM:g} km: "
+                f"<b>{ctx['cropland_km2']:.1f} km²</b> ({pct:.0f}% of the circle)")
+    return ("<br><span style='color:#79c0ff;'>💧 " + " · ".join(bits) + "</span>" + farm)
 
 
 def _fmt_arrow(is_better: bool | None) -> str:
@@ -224,6 +284,7 @@ with st.sidebar:
     st.caption(SCENARIOS[scenario_name]["rationale"])
 
     scenario_matrix = ahp_engine.matrix_for_scenario(scenario_name)
+    _render_scenario_priorities(scenario_name, scenario_matrix)
 
     with st.expander("Edit pairwise matrix", expanded=False):
         st.caption(
@@ -331,9 +392,49 @@ if result:
             f'· {st.session_state.get("scenario", "")}</span></div>',
             unsafe_allow_html=True)
 
+        # Top sites of all four algorithms under the current judgements, for
+        # the per-algorithm site overlays. Recomputed only when the pairwise
+        # matrix changes (≈0.6 s); the overlays start switched off.
+        matrix_key = tuple(np.round(matrix, 6).ravel())
+        if st.session_state.get("algo_sites_key") != matrix_key:
+            stack = build_criteria_stack(data_dir)
+            algo_sites = {}
+            for name in ALGORITHMS:
+                w, agg, _label = weights_for_algorithm(name, matrix, ahp_engine.criteria)
+                algo_sites[name] = score_stack(
+                    stack, w, aggregator=agg, algorithm=name,
+                    extract_sites=False)["top_locations_details"]
+            st.session_state["algo_sites"] = algo_sites
+            st.session_state["algo_sites_key"] = matrix_key
+
+        # Farmland scenario: water and farmland context for each candidate site
+        site_ctx = {}
+        if st.session_state.get("scenario") == FARMLAND_SCENARIO:
+            _stack = build_criteria_stack(data_dir)
+            _works, _conf = STR.load_water_works(), STR.load_confirmed()
+            site_ctx = {loc["rank"]: STR.site_context(loc, _stack, _works, _conf)
+                        for loc in (result.get("top_locations_details") or [])[:25]}
+
         # Render map with suitability zones
-        map_html = render_map(result)
-        st.components.v1.html(map_html, height=500)
+        map_html = render_map(result, stack=build_criteria_stack(data_dir),
+                              site_context=site_ctx,
+                              algorithm_sites=st.session_state.get("algo_sites"),
+                              water_works=STR.load_water_works(),
+                              confirmed_structures=STR.load_confirmed())
+        st.components.v1.html(map_html, height=640)
+        works = STR.load_water_works()
+        if works:
+            enrich = STR.enrichment(works, STR.zone_of_points(works, result), result)
+            if enrich and enrich["High"]["area_pct"]:
+                h = enrich["High"]
+                st.caption(
+                    f"Existing MGNREGA water works (WC/WH, {enrich['n']:,} in the scored area): "
+                    f"{h['points_pct']:.1f}% lie in High zones, which cover {h['area_pct']:.2f}% "
+                    f"of the district ({h['ratio']:.2f}× the area share). These are category "
+                    f"codes, not verified structures: the photo audit found about 17–49% of "
+                    f"them show a harvesting structure. Most works sit on cropland, which "
+                    f"the model also favours, so part of this agreement comes from land "
+                    f"cover alone. Agreement with existing practice, not an accuracy measure.")
 
         # ─── Area Statistics ─────────────────────────────────────────────────
         area_stats = result.get("area_statistics")
@@ -394,6 +495,7 @@ if result:
                 if "settlement_km" in raw:
                     raw_bits.append(f"{raw['settlement_km']:.1f} km from settlement")
                 raw_str = " · ".join(raw_bits)
+                ctx_html = _site_context_html(site_ctx.get(loc["rank"])) if site_ctx else ""
 
                 st.markdown(
                     f"""
@@ -402,6 +504,7 @@ if result:
                     Coordinates: {loc['lon']:.5f}, {loc['lat']:.5f}<br>
                     <strong>Criteria satisfied:</strong> {satisfied_str}
                     {f"<br><span style='color:#7d8590;'>{raw_str}</span>" if raw_str else ""}
+                    {ctx_html}
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -619,7 +722,11 @@ if result:
                     "theoretical weight AHP assigned it. Ratio > 1 means the "
                     "criterion punches above its assigned weight across the district."
                 )
-                sdf = pd.DataFrame(sp["rows"])
+                # Named columns, not positional: the rows also carry unrounded
+                # *_exact fields for the figures, which the table does not show.
+                sdf = pd.DataFrame(sp["rows"])[
+                    ["criterion", "theoretical_pct", "effective_pct",
+                     "effective_sd", "ratio"]]
                 sdf.columns = ["Criterion", "Theoretical %", "Effective %",
                                "SD", "Ratio"]
                 st.dataframe(sdf, use_container_width=True, hide_index=True)
