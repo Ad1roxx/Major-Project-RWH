@@ -28,6 +28,11 @@ Thumbs.db
 outputs/*
 !outputs/figures/
 !outputs/paper/
+# Validation: the small, citable outputs are tracked; the 25 MB point tables
+# are regenerable with tools/validate_mgnrega.py.
+!outputs/validation/
+outputs/validation/validation_points.csv
+outputs/validation/validation_criteria.csv
 *.log
 
 # ── Data ─────────────────────────────────────────────────────────────────────
@@ -44,3 +49,20 @@ data/*.cpg
 data/*.qmd
 !data/boundary.geojson
 !data/rivers.geojson
+
+# MGNREGA raw geotag responses: they contain observer names (personal data)
+# and are re-pullable with tools/pull_mgnrega.py. PROVENANCE.md,
+# dropdown_codes.tsv and category_codes.csv stay tracked.
+data/raw/mgnrega/*.json
+data/raw/mgnrega/stage*/*.json
+
+# Statewide downloads (31 MB), re-downloadable; see data/raw/talukas/PROVENANCE.md.
+# The small Chandrapur extracts beside them stay tracked.
+data/raw/talukas/MAHARASHTRA_*.geojson
+
+# MGNREGA field photos for the audit: they may show people.
+reports/photo_audit/
+
+# CGWB report PDF (13 MB, public, re-downloadable; see data/raw/cgwb/PROVENANCE.md)
+data/raw/cgwb/*.pdf
+data/raw/gsda/*.pdf

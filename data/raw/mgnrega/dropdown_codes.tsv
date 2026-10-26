@@ -1,0 +1,410 @@
+select_central	4	Accepted Geotags
+stage	0	PHASE I: ASSETS
+stage	1	PHASE II: BEFORE
+stage	2	PHASE II: DURING
+stage	3	PHASE II: AFTER
+selected_fy	All	All
+selected_fy	2026-2027	2026-2027
+selected_fy	2025-2026	2025-2026
+selected_fy	2024-2025	2024-2025
+selected_fy	2023-2024	2023-2024
+selected_fy	2022-2023	2022-2023
+selected_fy	2021-2022	2021-2022
+selected_fy	2020-2021	2020-2021
+selected_fy	2019-2020	2019-2020
+selected_fy	2018-2019	2018-2019
+selected_fy	2017-2018	2017-2018
+selected_fy	2016-2017	2016-2017
+selected_fy	2015-2016	2015-2016
+selected_fy	2014-2015	2014-2015
+selected_fy	2013-2014	2013-2014
+selected_fy	2012-2013	2012-2013
+selected_fy	2011-2012	2011-2012
+selected_fy	2010-2011	2010-2011
+selected_fy	2009-2010	2009-2010
+selected_fy	2008-2009	2008-2009
+selected_fy	2007-2008	2007-2008
+selected_fy	2006-2007	2006-2007
+select_fyear	All	All
+select_fyear	2026-2027	2026-2027
+select_fyear	2025-2026	2025-2026
+select_fyear	2024-2025	2024-2025
+select_fyear	2023-2024	2023-2024
+select_fyear	2022-2023	2022-2023
+select_fyear	2021-2022	2021-2022
+select_fyear	2020-2021	2020-2021
+select_fyear	2019-2020	2019-2020
+select_fyear	2018-2019	2018-2019
+select_fyear	2017-2018	2017-2018
+select_fyear	2016-2017	2016-2017
+select_fyear	2015-2016	2015-2016
+select_fyear	2014-2015	2014-2015
+select_fyear	2013-2014	2013-2014
+select_fyear	2012-2013	2012-2013
+select_fyear	2011-2012	2011-2012
+select_fyear	2010-2011	2010-2011
+select_fyear	2009-2010	2009-2010
+select_fyear	2008-2009	2008-2009
+select_fyear	2007-2008	2007-2008
+select_fyear	2006-2007	2006-2007
+state	All	All
+state	01	ANDAMAN AND NICOBAR
+state	02	ANDHRA PRADESH
+state	03	ARUNACHAL PRADESH
+state	04	ASSAM
+state	05	BIHAR
+state	33	CHHATTISGARH
+state	07	DN HAVELI AND DD
+state	10	GOA
+state	11	GUJARAT
+state	12	HARYANA
+state	13	HIMACHAL PRADESH
+state	14	JAMMU AND KASHMIR
+state	34	JHARKHAND
+state	15	KARNATAKA
+state	16	KERALA
+state	37	LADAKH
+state	19	LAKSHADWEEP
+state	17	MADHYA PRADESH
+state	18	MAHARASHTRA
+state	20	MANIPUR
+state	21	MEGHALAYA
+state	22	MIZORAM
+state	23	NAGALAND
+state	24	ODISHA
+state	25	PUDUCHERRY
+state	26	PUNJAB
+state	27	RAJASTHAN
+state	28	SIKKIM
+state	29	TAMIL NADU
+state	36	TELANGANA
+state	30	TRIPURA
+state	35	UTTARAKHAND
+state	31	UTTAR PRADESH
+state	32	WEST BENGAL
+district	All	All
+district	1809	AHILYANAGAR
+district	1823	AKOLA
+district	1824	AMRAVATI
+district	1818	BEED
+district	1828	BHANDARA
+district	1822	BULDHANA
+district	1829	CHANDRAPUR
+district	1815	Chatrapati Sambhaji Nagar
+district	1820	Dharashiv
+district	1807	DHULE
+district	1830	GADCHIROLI
+district	1833	GONDIA
+district	1834	HINGOLI
+district	1808	JALGAON
+district	1816	JALNA
+district	1814	KOLHAPUR
+district	1821	LATUR
+district	1827	NAGPUR
+district	1819	NANDED
+district	1831	NANDURBAR
+district	1806	NASHIK
+district	1835	PALGHAR
+district	1817	PARBHANI
+district	1810	PUNE
+district	1803	RAIGAD
+district	1804	RATNAGIRI
+district	1812	SANGLI
+district	1811	SATARA
+district	1805	SINDHUDURG
+district	1813	SOLAPUR
+district	1802	THANE
+district	1826	WARDHA
+district	1832	WASHIM
+district	1825	YAVATMAL
+block	All	All
+block	1829012	BALLARPUR
+block	1829002	BHADRAVATI
+block	1829006	BRAHMAPURI
+block	1829001	CHANDRAPUR
+block	1829004	CHIMUR
+block	1829009	GONDPIPRI
+block	1829015	JIVTI
+block	1829013	KORPANA
+block	1829008	MUL
+block	1829005	NAGBHIR
+block	1829016	POMBHURNA
+block	1829010	RAJURA
+block	1829011	SAOLI
+block	1829014	SINDEWAHI
+block	1829003	WARORA
+panchayat	All	All
+asset_category	All	All
+asset_category	16	Coastal Areas
+asset_category	07	Other Works
+asset_category	09	Works on Individuals Land (Category IV)
+asset_category	15	Drought Proofing
+asset_category	10	Micro Irrigation Works
+asset_category	06	Play Ground
+asset_category	17	Anganwadi/Other Rural Infrastructure
+asset_category	04	Rural Sanitation
+asset_category	13	Food Grain
+asset_category	08	Land Development
+asset_category	01	Renovation of traditional water bodies
+asset_category	14	Rural Drinking Water
+asset_category	02	Water Conservation and Water Harvesting
+asset_category	12	Flood Control and Protection
+asset_category	11	Fisheries
+asset_category	05	Rural Connectivity
+asset_category	03	Bharat Nirman Sewa Kendra
+asset_sub_category	All	All
+asset_yukcategory	All	All
+asset_yukcategory	A	Category 1 - Water Security
+asset_yukcategory	A	Category 3 - Rural Livelihood
+asset_yukcategory	A	Category 4 - Disaster Management
+asset_yukcategory	A	Category 2 - Core Rural Infrastructure
+asset_yukcategory	B	Category 4 - Disaster Management
+asset_yukcategory	B	Category 3 - Rural Livelihood
+asset_yukcategory	B	Category 1 - Water Security
+asset_yukcategory	B	Category 2 - Core Rural Infrastructure
+asset_yukcategory	C	Category 3 - Rural Livelihood
+asset_yukcategory	D	Category 2 - Core Rural Infrastructure
+asset_yukcategory	D	Category 4 - Disaster Management
+asset_yukcategory	D	Category 3 - Rural Livelihood
+asset_yukcategory	D	Category 1 - Water Security
+asset_sub_category	All	All
+asset_category		
+asset_sub_category		
+asset_category		
+asset_sub_category		
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100
+	10	10
+	25	25
+	50	50
+	100	100

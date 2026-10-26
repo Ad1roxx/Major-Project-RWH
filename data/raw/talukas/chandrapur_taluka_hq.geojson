@@ -1,0 +1,22 @@
+{
+"type": "FeatureCollection",
+"name": "chandrapur_taluka_hq",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "taluka_hq": "Nagbhir", "SDTCODE11": "04066" }, "geometry": { "type": "Point", "coordinates": [ 79.680768979370569, 20.57528218983208 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Brahmapuri", "SDTCODE11": "04067" }, "geometry": { "type": "Point", "coordinates": [ 79.858452388260119, 20.612029445660617 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Ballarpur", "SDTCODE11": "04074" }, "geometry": { "type": "Point", "coordinates": [ 79.351857819796578, 19.8530035911974 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Warora", "SDTCODE11": "04064" }, "geometry": { "type": "Point", "coordinates": [ 79.007149776069909, 20.230290018655928 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Chimur", "SDTCODE11": "04065" }, "geometry": { "type": "Point", "coordinates": [ 79.380023651113774, 20.490932979372648 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Sindewahi", "SDTCODE11": "04069" }, "geometry": { "type": "Point", "coordinates": [ 79.659536613114156, 20.28753999357242 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Mul", "SDTCODE11": "04072" }, "geometry": { "type": "Point", "coordinates": [ 79.676744325675102, 20.065342606518435 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Pombhurna", "SDTCODE11": "04073" }, "geometry": { "type": "Point", "coordinates": [ 79.638258609746359, 19.871403343329909 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Rajura", "SDTCODE11": "04077" }, "geometry": { "type": "Point", "coordinates": [ 79.366076095398839, 19.774193343378645 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Chandrapur", "SDTCODE11": "04071" }, "geometry": { "type": "Point", "coordinates": [ 79.294425217882562, 19.95245693112042 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Sawali", "SDTCODE11": "04068" }, "geometry": { "type": "Point", "coordinates": [ 79.786968374604541, 20.082390798717004 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Bhadravati", "SDTCODE11": "04070" }, "geometry": { "type": "Point", "coordinates": [ 79.154158067999589, 20.123997305429111 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Korpana", "SDTCODE11": "04075" }, "geometry": { "type": "Point", "coordinates": [ 78.993388504893744, 19.73782207305997 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Gondpipri", "SDTCODE11": "04078" }, "geometry": { "type": "Point", "coordinates": [ 79.686424057340417, 19.715871570956399 ] } },
+{ "type": "Feature", "properties": { "taluka_hq": "Jiwati", "SDTCODE11": "04076" }, "geometry": { "type": "Point", "coordinates": [ 79.062884630368899, 19.620264730029891 ] } }
+]
+}

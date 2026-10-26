@@ -1,0 +1,26 @@
+Category segment of the workcode (the only category field), every distinct
+value inside the district, with the decision for each. No asset-type field
+exists, so individual structure types (farm pond, check dam ...) cannot be
+selected; the photo audit measures what the kept segments contain.
+
+EXCLUDED  IF         42,213
+EXCLUDED  RS         13,424
+EXCLUDED  DP          7,915
+KEPT      WC          5,234
+EXCLUDED  RC          5,210
+KEPT      WH          3,009
+EXCLUDED  LD          2,672
+EXCLUDED  FP            761
+EXCLUDED  (none)        418
+EXCLUDED  IC            233
+EXCLUDED  OP            189
+EXCLUDED  DW            179
+EXCLUDED  AV            134
+EXCLUDED  SK             49
+EXCLUDED  1               2
+EXCLUDED  FR              2
+EXCLUDED  2               2
+EXCLUDED  4               1
+EXCLUDED  3               1
+EXCLUDED  WC860(50)       1
+EXCLUDED  PG              1
