@@ -20,7 +20,7 @@ st.set_page_config(
     page_title="RWH Suitability Analysis | AHP",
     page_icon=":material/water_drop:",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",  # open on a desktop, closed on a phone
 )
 
 pg = st.navigation([
@@ -144,8 +144,58 @@ html, body, [class*="css"] {
     background: #c9d1d9 !important;
 }
 
-[class*="st-key-view_site_"] {
-    margin-top: -10px;
+/* Candidate site cards. Rank 1 gets a subtle highlight. */
+[class*="st-key-site_card_"] {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+}
+
+.st-key-site_card_1 {
+    border-left: 3px solid #58a6ff;
+}
+
+[class*="st-key-site_card_"] [data-testid="stMarkdownContainer"],
+[class*="st-key-site_card_"] [data-testid="stMarkdownContainer"] p {
+    font-size: 0.85rem;
+}
+
+[class*="st-key-site_card_"] .site-title {
+    font-size: 0.95rem;
+}
+
+.site-coords {
+    color: #7d8590;
+    padding-bottom: 1rem;
+}
+
+.criteria-count {
+    margin-left: 6px;
+    padding: 1px 8px;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    color: #7d8590;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.photo-link {
+    display: inline-block;
+    margin: 2px 4px 2px 0;
+    padding: 1px 8px;
+    border: 1px solid #484f58;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #79c0ff !important;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+.photo-link:hover {
+    background: #30363d;
 }
 
 [class*="st-key-view_site_"] button {
@@ -160,6 +210,30 @@ html, body, [class*="css"] {
 
 [class*="st-key-view_site_"] button:hover {
     background: #30363d !important;
+}
+
+/* Four metrics in a row beside the sidebar: at full size their values get cut off. */
+@media (max-width: 1100px) {
+    [data-testid="stMetricValue"] > div {
+        font-size: 1.4rem;
+    }
+
+    [data-testid="stMetricLabel"] p {
+        font-size: 0.78rem;
+    }
+}
+
+/* The comparison stays side by side on a phone: stacked, A and B can't be told apart. */
+@media (max-width: 640px) {
+    .st-key-compare_rows [data-testid="stHorizontalBlock"] {
+        flex-wrap: nowrap;
+        font-size: 0.78rem;
+    }
+
+    .st-key-compare_rows [data-testid="stColumn"] {
+        min-width: 0 !important;
+        overflow-wrap: anywhere;
+    }
 }
 
 .sidebar-title {

@@ -6,7 +6,7 @@ Display and comparison only: nothing here feeds the suitability model.
 Two point sets:
   • water works: every in-district MGNREGA geotag in the two water categories
     (WC, WH), from data/interim/mgnrega_all.parquet. The photo audit
-    (docs/PHOTO_LABELLING_PROTOCOL.md) found only about 17% (strict) to 49%
+    (docs/PHOTO_LABELLING_PROTOCOL.md) found only about 17% (strict) to 50%
     (lenient) of these photos show a harvesting structure, so they are
     unverified works, not confirmed structures.
   • photo-confirmed structures: the audit photos either labeller marked storage
@@ -195,14 +195,15 @@ def site_context(site: dict, stack: dict, works: list[dict],
     return ctx
 
 
-def works_links_html(ctx: dict) -> str:
+def works_links_html(ctx: dict, link_class: str = "", separator: str = ", ") -> str:
     """The nearest unverified works, each linked to its Bhuvan photo."""
+    css = f" class='{link_class}'" if link_class else ""
     items = []
     for w in ctx.get("works_near") or []:
         label = f"{w['km']:.2f} km {w['category']}"
-        items.append(f"<a href='{w['url']}' target='_blank' rel='noopener'>{label} &#8599;</a>"
+        items.append(f"<a{css} href='{w['url']}' target='_blank' rel='noopener'>{label} &#8599;</a>"
                      if w.get("url") else label)
-    return ", ".join(items)
+    return separator.join(items)
 
 
 def nearby(site: dict, points: list[dict], km: float = OVERLAP_KM) -> list[tuple[float, dict]]:

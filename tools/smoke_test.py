@@ -168,6 +168,11 @@ def main() -> int:
         failures.append("site comparison choice lost after changing page")
     print(f"  {'ok  ' if kept else 'FAIL'}  site choice survives changing page")
 
+    bad = check_notes_follow_view(at)
+    if bad:
+        failures.extend(bad)
+    print(f"  {'FAIL' if bad else 'ok  '}  TOPSIS note and paper sentence follow the view")
+
     # The Candidate sites picker must give what the sidebar gives for that combination.
     bad = check_site_combinations(at)
     if bad:
@@ -239,13 +244,40 @@ def main() -> int:
     return 0
 
 
+def check_notes_follow_view(at) -> list:
+    """The TOPSIS note and the paper's 1.93x sentence each show only where they apply."""
+    problems = []
+
+    def captions():
+        return " ".join(c.value for c in at.caption)
+
+    at.switch_page("views/agreement.py").run()
+    text = captions()
+    if "uses 3,119 works" not in text:
+        problems.append("paper sentence missing on baseline AHP + WLC")
+    info = " ".join(i.value for i in at.info)
+    if "17–50%" not in info or "not an accuracy measure" not in info:
+        problems.append("caveat box missing wording")
+    at.sidebar.selectbox[1].select("AHP + TOPSIS").run()
+    if "uses 3,119 works" in captions():
+        problems.append("paper sentence shown away from baseline AHP + WLC")
+
+    at.switch_page("views/sites.py").run()
+    if "don't add up" not in captions():
+        problems.append("TOPSIS note missing")
+    at.sidebar.selectbox[1].select("AHP + WLC").run()
+    if "don't add up" in captions():
+        problems.append("TOPSIS note shown under WLC")
+    return problems
+
+
 def check_site_combinations(at) -> list:
     """The first card of every picker combination, against the same combination
     chosen in the sidebar. They must be the same site with the same score."""
     import re
 
     def first_card():
-        cards = [m.value for m in at.markdown if "location-card" in m.value and "Coordinates" in m.value]
+        cards = [m.value for m in at.markdown if "site-coords" in m.value]
         return re.sub(r"\s+", " ", cards[0]) if cards else None
 
     problems = []

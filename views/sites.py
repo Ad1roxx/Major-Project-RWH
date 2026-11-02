@@ -12,15 +12,13 @@ from utils.labels import criterion_label
 
 
 def site_context_html(ctx: dict | None) -> str:
-    """Water and farmland context line for a site card (farmland scenario)."""
+    """Water and farmland context for a site's details (farmland scenario)."""
     if not ctx:
         return ""
     bits = []
     if "work_km" in ctx:
         bits.append(f"nearest MGNREGA water work ({ctx['work_cat']}, unverified) "
                     f"<b>{ctx['work_km']:.2f} km</b>")
-    if ctx.get("works_near"):
-        bits.append("check their photos: " + STR.works_links_html(ctx))
     if "confirmed_km" in ctx:
         bits.append(f"nearest photo-confirmed structure <b>{ctx['confirmed_km']:.1f} km</b>")
     if "river_km" in ctx:
@@ -106,21 +104,38 @@ if top_locations:
         if "settlement_km" in raw:
             raw_bits.append(f"{raw['settlement_km']:.1f} km from settlement")
         raw_str = " · ".join(raw_bits)
-        ctx_html = site_context_html(site_ctx.get(loc["rank"])) if site_ctx else ""
+        ctx = site_ctx.get(loc["rank"]) if site_ctx else None
+        ctx_html = site_context_html(ctx)
+        count_html = (f"<span class='criteria-count'>{len(satisfied)}/{len(scores)} criteria</span>"
+                      if scores else "")
 
-        st.markdown(
-            f"""
-            <div class="location-card">
-            <strong>Rank #{loc['rank']}</strong> | Score: {loc['suitability_score']:.3f}<br>
-            Coordinates: {loc['lon']:.5f}, {loc['lat']:.5f}<br>
-            <strong>Criteria satisfied:</strong> {satisfied_str}
-            {f"<br><span style='color:#7d8590;'>{raw_str}</span>" if raw_str else ""}
-            {ctx_html}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("View on map", key=f"view_site_{loc['rank']}", icon=":material/my_location:"):
+        with st.container(key=f"site_card_{loc['rank']}"):
+            title_col, view_col = st.columns([4, 1], vertical_alignment="center")
+            with title_col:
+                st.markdown(
+                    f"""
+                    <div class="site-title"><strong>Rank #{loc['rank']}</strong> | Score: {loc['suitability_score']:.3f}{count_html}</div>
+                    <div class="site-coords">Coordinates: {loc['lon']:.5f}, {loc['lat']:.5f}</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with view_col:
+                view_clicked = st.button("View on map", key=f"view_site_{loc['rank']}",
+                                         icon=":material/my_location:")
+            if ctx and ctx.get("works_near"):
+                st.markdown("Nearest unverified works, check their photos: "
+                            + STR.works_links_html(ctx, link_class="photo-link", separator=""),
+                            unsafe_allow_html=True)
+            with st.expander("Details"):
+                st.markdown(
+                    f"""
+                    <strong>Criteria satisfied:</strong> {satisfied_str}
+                    {f"<br><span style='color:#7d8590;'>{raw_str}</span>" if raw_str else ""}
+                    {ctx_html}
+                    """,
+                    unsafe_allow_html=True,
+                )
+        if view_clicked:
             st.session_state["_map_focus"] = {
                 "id": str(time.time()),      # each click flies there, even to the same site
                 "lat": float(loc["lat"]), "lon": float(loc["lon"]),
@@ -175,6 +190,11 @@ if top_locations and len(top_locations) >= 2:
         else:
             overall_cmp = a_score > b_score
 
+        if a_score is not None and b_score is not None:
+            # From the rounded scores, so it matches the two scores shown below.
+            st.metric("Score difference (Site A − Site B)",
+                      f"{round(a_score, 3) - round(b_score, 3):+.3f}")
+
         header_cols = st.columns([1, 1])
         with header_cols[0]:
             st.markdown(
@@ -202,9 +222,13 @@ if top_locations and len(top_locations) >= 2:
             "</div>",
             unsafe_allow_html=True,
         )
+        if "TOPSIS" in list_method:
+            st.caption("Under TOPSIS, these figures show each criterion's weighted score "
+                       "and don't add up to the site's score.")
 
         # Table header
-        h1, h2, h3 = st.columns([1.2, 1, 1])
+        rows = st.container(key="compare_rows")
+        h1, h2, h3 = rows.columns([1.2, 1, 1])
         with h1:
             st.markdown("<div style='font-weight:700;'>Criterion</div>", unsafe_allow_html=True)
         with h2:
@@ -230,7 +254,7 @@ if top_locations and len(top_locations) >= 2:
             contrib_a = None if va is None else wa * va
             contrib_b = None if vb is None else wa * vb
 
-            r1, r2, r3 = st.columns([1.2, 1, 1])
+            r1, r2, r3 = rows.columns([1.2, 1, 1])
             with r1:
                 st.markdown(
                     f"<div style='color:#e6edf3;'>"
@@ -256,5 +280,6 @@ if top_locations and len(top_locations) >= 2:
                         unsafe_allow_html=True,
                     )
 
+st.markdown("---")
 st.page_link("views/method.py", label="Download sites and maps (Method page)",
              icon=":material/download:")

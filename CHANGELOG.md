@@ -9,6 +9,25 @@ Earlier history, reconstructed before this file existed, is in
 
 ---
 
+## 2026-11-02 (later) — UI phase 3: polish (branch `ui-overhaul`)
+
+- **Site cards** have a title line with a criteria count, then coordinates. Details
+  go in an expander, Bhuvan links become small buttons, and rank 1 is highlighted.
+- **Site A vs Site B** starts with the score difference. Under TOPSIS, a note says the
+  "+" figures don't add up to the site's score: there it isn't a weighted sum, and for
+  the top two baseline sites the gap is up to 0.005.
+- **Agreement page** puts the caveats first and shows the statistics as labelled
+  metrics.
+- **Text:** "17–49%" is now "17–50%". On the baseline AHP + WLC view, a new sentence
+  separates the live figure, computed on all works, from the paper's 1.93× on 3,119
+  thinned works.
+- **Narrow screens:** no overflow at 900 and 390 px. Metric values shrink below
+  1100 px so they aren't cut off, and the sidebar starts closed on a phone.
+- **Checks:** `tools/smoke_test.py` confirms the TOPSIS note and the paper sentence show
+  only where they apply. `docs/UI_CHANGES.md` lists what moved where.
+
+---
+
 ## 2026-11-02 — Site picker, view on map, robustness labels (branch `ui-overhaul`)
 
 - **Candidate sites can list any method and scenario** without changing the sidebar or
