@@ -7,10 +7,12 @@ Single-button workflow: run analysis and display ideal RWH sites.
 
 import streamlit as st
 import os
+import re
 import numpy as np
 from gis_analysis import build_criteria_stack, score_stack
 from utils.map_renderer import render_map
 from utils import structures as STR
+from utils.labels import criterion_label
 from ahp import ahp_engine, SCENARIOS
 from algorithms import ALGORITHMS, weights_for_algorithm, compare_algorithms
 import criteria as C
@@ -35,10 +37,89 @@ def _criterion_sort_key(criterion: str, weights: dict) -> tuple:
     return (-w, fallback_idx, criterion)
 
 
-CRITERION_NAMES = {"slope": "Slope", "rainfall": "Rainfall", "drainage": "Drainage density",
-                   "soil": "Soil texture", "lulc": "Land cover (cropland)",
-                   "population": "Settlement proximity"}
 FARMLAND_SCENARIO = "Fertile farmland"
+MATRIX_HELP = (
+    "Saaty 1–9 scale. Edit the upper triangle only — the lower triangle is "
+    "rebuilt as its reciprocal. Row *i* over column *j* is how much more "
+    "important *i* is than *j*."
+)
+
+
+def _icon(name: str) -> str:
+    """A Material Symbols glyph, for headings written as raw HTML."""
+    return f'<span class="rwh-icon">{name}</span>'
+
+
+def _section(title: str, icon: str, suffix: str = "") -> None:
+    st.markdown(f'<div class="section-header">{_icon(icon)}{title}{suffix}</div>',
+                unsafe_allow_html=True)
+
+
+_NOTE_ICONS = {"⚠️": ":material/warning:", "✅": ":material/check_circle:",
+               "ℹ️": ":material/info:", "📊": ":material/bar_chart:"}
+
+
+def _note_markdown(note: str) -> str:
+    """A pipeline note with Material icons and the human land-cover label."""
+    for emoji, icon in _NOTE_ICONS.items():
+        note = note.replace(emoji, icon)
+    return re.sub(r"\b(LULC|Lulc)\b", "Land cover", note)
+
+
+def _reciprocal_matrix(table) -> np.ndarray:
+    """A pairwise matrix from an editor table: upper triangle kept, lower rebuilt."""
+    # np.array (not asarray) — the DataFrame st.data_editor returns is backed
+    # by a read-only buffer, so an in-place edit below would raise
+    # "ValueError: assignment destination is read-only". Copy first.
+    matrix = np.array(table, dtype=float, copy=True)
+    # Enforce reciprocity from the upper triangle so the matrix stays valid.
+    n = matrix.shape[0]
+    for i in range(n):
+        matrix[i, i] = 1.0
+        for j in range(i + 1, n):
+            if matrix[i, j] <= 0 or not np.isfinite(matrix[i, j]):
+                matrix[i, j] = 1.0
+            matrix[j, i] = 1.0 / matrix[i, j]
+    return matrix
+
+
+def _matrix_table(matrix):
+    """The table the editor shows, rounded as the scoring matrix is built from it."""
+    import pandas as pd
+    names = [criterion_label(c) for c in ahp_engine.criteria]
+    return pd.DataFrame(matrix, index=names, columns=names).round(3)
+
+
+def _cr_message(cr: float, note: str = "") -> str:
+    if cr < 0.10:
+        return (f'<div class="status-ok">{_icon("check_circle")}Consistency Ratio '
+                f'{cr:.4f}{note} — acceptable</div>')
+    return (f'<div class="status-missing">{_icon("cancel")}Consistency Ratio {cr:.4f} — '
+            f'inconsistent, revise the judgements</div>')
+
+
+@st.dialog("Edit pairwise matrix", width="large")
+def _matrix_dialog(scenario_name: str, current) -> None:
+    # Closing a dialog clears its widgets' state, so an applied matrix is stored
+    # in session state; the sidebar reads that, never the editor directly.
+    st.caption(MATRIX_HELP)
+    edited = st.data_editor(
+        _matrix_table(current),
+        key=f"matrix_editor_{scenario_name}",
+        use_container_width=True,
+    )
+    preview = _reciprocal_matrix(edited)
+    _weights, cr = ahp_engine.calculate_weights(preview)
+    st.markdown(_cr_message(cr), unsafe_allow_html=True)
+    apply_col, cancel_col, _ = st.columns([1, 1, 3])
+    with apply_col:
+        if st.button("Apply", key="matrix_apply", use_container_width=True):
+            st.session_state["_matrix_applied"] = {"scenario": scenario_name,
+                                                   "matrix": preview}
+            st.rerun()
+    with cancel_col:
+        if st.button("Cancel", key="matrix_cancel", use_container_width=True):
+            st.rerun()
 
 
 def _render_scenario_priorities(scenario_name: str, scenario_matrix) -> None:
@@ -55,10 +136,10 @@ def _render_scenario_priorities(scenario_name: str, scenario_matrix) -> None:
             arrow, col = ("▲", "#3fb950") if w > b else ("▼", "#f85149")
             change = (f"<span style='color:{col};'>{arrow} from {b:.2f}</span>")
         rows.append(
-            f"<tr><td style='padding:1px 6px 1px 0;'>{CRITERION_NAMES.get(c, c)}</td>"
+            f"<tr><td style='padding:1px 6px 1px 0;'>{criterion_label(c)}</td>"
             f"<td style='text-align:right;padding:1px 6px;'><b>{w:.2f}</b></td>"
             f"<td style='font-size:0.75rem;'>{change}</td></tr>")
-    top = [CRITERION_NAMES.get(c, c) for c in sorted(weights, key=weights.get, reverse=True)[:2]]
+    top = [criterion_label(c) for c in sorted(weights, key=weights.get, reverse=True)[:2]]
     farm_note = ("<div style='color:#7d8590;margin-top:4px;'>Farmland sites also show "
                  "the distance to existing water works and rivers, and the cropland "
                  "around them.</div>") if scenario_name == FARMLAND_SCENARIO else ""
@@ -89,9 +170,9 @@ def _site_context_html(ctx: dict | None) -> str:
     if ctx.get("area_km2"):
         pct = 100 * ctx["cropland_km2"] / ctx["area_km2"]
         on = "on cropland" if ctx.get("on_cropland") else "not on cropland"
-        farm = (f"<br>🌾 Site {on}; cropland within {STR.FARMLAND_RADIUS_KM:g} km: "
+        farm = (f"<br>Site {on}; cropland within {STR.FARMLAND_RADIUS_KM:g} km: "
                 f"<b>{ctx['cropland_km2']:.1f} km²</b> ({pct:.0f}% of the circle)")
-    return ("<br><span style='color:#79c0ff;'>💧 " + " · ".join(bits) + "</span>" + farm)
+    return ("<br><span style='color:#79c0ff;'>" + " · ".join(bits) + "</span>" + farm)
 
 
 def _fmt_arrow(is_better: bool | None) -> str:
@@ -112,7 +193,7 @@ def _safe_float(x):
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="RWH Suitability Analysis | AHP",
-    page_icon="💧",
+    page_icon=":material/water_drop:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -126,9 +207,19 @@ html, body, [class*="css"] {
     font-family: 'DM Sans', sans-serif;
 }
 
-.stApp {
-    background: #0d1117;
-    color: #e6edf3;
+.rwh-icon {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.15em;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    vertical-align: -0.18em;
+    margin-right: 0.4em;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
 }
 
 .main-title {
@@ -190,9 +281,9 @@ html, body, [class*="css"] {
 }
 
 .stButton > button {
-    background: #1f6feb !important;
-    color: white !important;
-    border: none !important;
+    background: #30363d !important;
+    color: #e6edf3 !important;
+    border: 1px solid #484f58 !important;
     border-radius: 8px !important;
     font-family: 'DM Sans', sans-serif !important;
     font-weight: 600 !important;
@@ -202,7 +293,17 @@ html, body, [class*="css"] {
 }
 
 .stButton > button:hover {
-    background: #388bfd !important;
+    background: #484f58 !important;
+}
+
+.st-key-run_analysis button, .st-key-matrix_apply button {
+    background: #e6edf3 !important;
+    color: #0d1117 !important;
+    border-color: #e6edf3 !important;
+}
+
+.st-key-run_analysis button:hover, .st-key-matrix_apply button:hover {
+    background: #c9d1d9 !important;
 }
 
 .sidebar-title {
@@ -245,12 +346,12 @@ div[data-testid="stExpander"] {
 # ─── Header ───────────────────────────────────────────────────────────────────
 col_h1, col_h2 = st.columns([3, 1])
 with col_h1:
-    st.markdown('<div class="main-title">💧 RWH Suitability Analysis</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="main-title">{_icon("water_drop")}RWH Suitability Analysis</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">AHP-based Multi-Criteria Decision System · Chandrapur District</div>', unsafe_allow_html=True)
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">📁 Data Status</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-title">{_icon("folder")}Data Status</div>', unsafe_allow_html=True)
 
     def _exists_any(data_dir: str, names: list[str]) -> bool:
         return any(os.path.exists(os.path.join(data_dir, n)) for n in names)
@@ -271,14 +372,14 @@ with st.sidebar:
 
     for _, (label, candidates) in layers.items():
         if _exists_any(data_dir, candidates):
-            st.markdown(f'<div class="status-ok">✅ {label}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="status-ok">{_icon("check_circle")}{label}</div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div class="status-missing">❌ {label}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="status-missing">{_icon("cancel")}{label}</div>', unsafe_allow_html=True)
             all_present = False
 
     # ─── Scenario + weights ──────────────────────────────────────────────────
     st.markdown("---")
-    st.markdown('<div class="sidebar-title">⚖️ Weighting</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-title">{_icon("balance")}Weighting</div>', unsafe_allow_html=True)
 
     scenario_name = st.selectbox("Scenario", list(SCENARIOS), index=0, key="scenario")
     st.caption(SCENARIOS[scenario_name]["rationale"])
@@ -286,31 +387,21 @@ with st.sidebar:
     scenario_matrix = ahp_engine.matrix_for_scenario(scenario_name)
     _render_scenario_priorities(scenario_name, scenario_matrix)
 
-    with st.expander("Edit pairwise matrix", expanded=False):
-        st.caption(
-            "Saaty 1–9 scale. Edit the upper triangle only — the lower triangle is "
-            "rebuilt as its reciprocal. Row *i* over column *j* is how much more "
-            "important *i* is than *j*."
-        )
-        import pandas as pd
-        crit = ahp_engine.criteria
-        edited = st.data_editor(
-            pd.DataFrame(scenario_matrix, index=crit, columns=crit).round(3),
-            key=f"matrix_editor_{scenario_name}",
-            use_container_width=True,
-        )
-        # np.array (not asarray) — the DataFrame st.data_editor returns is backed
-        # by a read-only buffer, so an in-place edit below would raise
-        # "ValueError: assignment destination is read-only". Copy first.
-        matrix = np.array(edited, dtype=float, copy=True)
-        # Enforce reciprocity from the upper triangle so the matrix stays valid.
-        n = matrix.shape[0]
-        for i in range(n):
-            matrix[i, i] = 1.0
-            for j in range(i + 1, n):
-                if matrix[i, j] <= 0 or not np.isfinite(matrix[i, j]):
-                    matrix[i, j] = 1.0
-                matrix[j, i] = 1.0 / matrix[i, j]
+    # The scoring matrix has always been built from the editor's table, which is
+    # rounded to 3 dp, so the app's CR and weights depend on that rounding. Going
+    # through the same steps here keeps every printed number the same.
+    # An applied edit lasts until the scenario changes, as it did in the old editor.
+    applied = st.session_state.get("_matrix_applied")
+    if applied and applied["scenario"] != scenario_name:
+        del st.session_state["_matrix_applied"]
+        applied = None
+    matrix = (applied["matrix"] if applied
+              else _reciprocal_matrix(_matrix_table(scenario_matrix)))
+
+    open_matrix_editor = st.button("Edit pairwise matrix", key="matrix_open",
+                                   icon=":material/grid_on:", use_container_width=True)
+    if applied:
+        st.caption("Using your edited matrix. Changing scenario returns to the defaults.")
 
     # ─── Algorithm ───────────────────────────────────────────────────────────
     algo_name = st.selectbox("Algorithm", list(ALGORITHMS), index=0, key="algorithm")
@@ -324,23 +415,16 @@ with st.sidebar:
     _crisp_weights, active_cr = ahp_engine.calculate_weights(matrix)
 
     cr_note = " (of the crisp matrix)" if weighting_label == "Fuzzy-AHP" else ""
-    if active_cr < 0.10:
-        st.markdown(
-            f'<div class="status-ok">✅ Consistency Ratio {active_cr:.4f}{cr_note} — acceptable</div>',
-            unsafe_allow_html=True)
-    else:
-        st.markdown(
-            f'<div class="status-missing">❌ Consistency Ratio {active_cr:.4f} — '
-            f'inconsistent, revise the judgements</div>', unsafe_allow_html=True)
+    st.markdown(_cr_message(active_cr, cr_note), unsafe_allow_html=True)
 
     st.markdown(
         "<div style='font-size:0.78rem; color:#7d8590; margin-top:6px;'>"
-        + "<br>".join(f"{k.capitalize()}: <b>{v:.3f}</b>" for k, v in
+        + "<br>".join(f"{criterion_label(k)}: <b>{v:.3f}</b>" for k, v in
                       sorted(active_weights.items(), key=lambda kv: -kv[1]))
         + "</div>", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown('<div class="sidebar-title">ℹ️ About</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-title">{_icon("info")}About</div>', unsafe_allow_html=True)
     st.markdown("""
     <div style="font-size:0.82rem; color:#7d8590; line-height:1.6;">
     This system uses Analytic Hierarchy Process (AHP) for multi-criteria evaluation of rainwater harvesting suitability, considering slope, rainfall, drainage, soil, land use, and population factors.
@@ -349,9 +433,13 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+if open_matrix_editor:
+    # Unedited, the table shows the scenario's own values, as the old editor did.
+    _matrix_dialog(scenario_name, matrix if applied else scenario_matrix)
+
 # ─── Run Button (single-button workflow) ─────────────────────────────────────
-st.markdown('<div class="section-header">🚀 Run Analysis</div>', unsafe_allow_html=True)
-run_btn = st.button("Run Suitability Analysis", use_container_width=False)
+_section("Run Analysis", "play_circle")
+run_btn = st.button("Run Suitability Analysis", key="run_analysis", use_container_width=False)
 
 if "analysis_result" not in st.session_state:
     st.session_state["analysis_result"] = None
@@ -383,45 +471,56 @@ if result:
 
         # ─── Provisional-input banner ────────────────────────────────────────
         if getattr(C, "RAINFALL_SOURCE_NOTE", None):
-            st.warning(f"⚠️ {C.RAINFALL_SOURCE_NOTE}")
+            st.warning(C.RAINFALL_SOURCE_NOTE, icon=":material/warning:")
 
         # ─── Suitability Map ─────────────────────────────────────────────────
-        st.markdown(
-            f'<div class="section-header">🗺️ Suitability Map '
-            f'<span style="font-size:0.75rem; color:#7d8590;">· {result.get("algorithm", "")} '
-            f'· {st.session_state.get("scenario", "")}</span></div>',
-            unsafe_allow_html=True)
+        _section("Suitability Map", "map",
+                 f'<span style="font-size:0.75rem; color:#7d8590;"> · {result.get("algorithm", "")} '
+                 f'· {st.session_state.get("scenario", "")}</span>')
 
-        # Top sites of all four algorithms under the current judgements, for
-        # the per-algorithm site overlays. Recomputed only when the pairwise
-        # matrix changes (≈0.6 s); the overlays start switched off.
+        # Folium gives the page new element ids on every render, so a rebuild
+        # reloads the iframe and resets the view. Build only when the result,
+        # matrix or scenario changes; anything else reuses the same page.
         matrix_key = tuple(np.round(matrix, 6).ravel())
-        if st.session_state.get("algo_sites_key") != matrix_key:
-            stack = build_criteria_stack(data_dir)
-            algo_sites = {}
-            for name in ALGORITHMS:
-                w, agg, _label = weights_for_algorithm(name, matrix, ahp_engine.criteria)
-                algo_sites[name] = score_stack(
-                    stack, w, aggregator=agg, algorithm=name,
-                    extract_sites=False)["top_locations_details"]
-            st.session_state["algo_sites"] = algo_sites
-            st.session_state["algo_sites_key"] = matrix_key
+        map_key = (st.session_state.get("result_key"), matrix_key,
+                   st.session_state.get("scenario"))
+        map_slot = st.empty()
+        map_cache = st.session_state.get("_map_cache")
+        if not map_cache or map_cache["key"] != map_key:
+            with map_slot, st.spinner("Building map..."):
+                # Top sites of all four algorithms under the current judgements,
+                # for the per-algorithm site overlays. Recomputed only when the
+                # pairwise matrix changes (≈0.6 s); the overlays start switched off.
+                if st.session_state.get("algo_sites_key") != matrix_key:
+                    stack = build_criteria_stack(data_dir)
+                    algo_sites = {}
+                    for name in ALGORITHMS:
+                        w, agg, _label = weights_for_algorithm(name, matrix, ahp_engine.criteria)
+                        algo_sites[name] = score_stack(
+                            stack, w, aggregator=agg, algorithm=name,
+                            extract_sites=False)["top_locations_details"]
+                    st.session_state["algo_sites"] = algo_sites
+                    st.session_state["algo_sites_key"] = matrix_key
 
-        # Farmland scenario: water and farmland context for each candidate site
-        site_ctx = {}
-        if st.session_state.get("scenario") == FARMLAND_SCENARIO:
-            _stack = build_criteria_stack(data_dir)
-            _works, _conf = STR.load_water_works(), STR.load_confirmed()
-            site_ctx = {loc["rank"]: STR.site_context(loc, _stack, _works, _conf)
-                        for loc in (result.get("top_locations_details") or [])[:25]}
+                # Farmland scenario: water and farmland context for each candidate site
+                site_ctx = {}
+                if st.session_state.get("scenario") == FARMLAND_SCENARIO:
+                    _stack = build_criteria_stack(data_dir)
+                    _works, _conf = STR.load_water_works(), STR.load_confirmed()
+                    site_ctx = {loc["rank"]: STR.site_context(loc, _stack, _works, _conf)
+                                for loc in (result.get("top_locations_details") or [])[:25]}
 
-        # Render map with suitability zones
-        map_html = render_map(result, stack=build_criteria_stack(data_dir),
-                              site_context=site_ctx,
-                              algorithm_sites=st.session_state.get("algo_sites"),
-                              water_works=STR.load_water_works(),
-                              confirmed_structures=STR.load_confirmed())
-        st.components.v1.html(map_html, height=640)
+                # Render map with suitability zones
+                map_html = render_map(result, stack=build_criteria_stack(data_dir),
+                                      site_context=site_ctx,
+                                      algorithm_sites=st.session_state.get("algo_sites"),
+                                      water_works=STR.load_water_works(),
+                                      confirmed_structures=STR.load_confirmed())
+            map_cache = {"key": map_key, "html": map_html, "site_ctx": site_ctx}
+            st.session_state["_map_cache"] = map_cache
+        site_ctx = map_cache["site_ctx"]
+        with map_slot:
+            st.components.v1.html(map_cache["html"], height=640)
         works = STR.load_water_works()
         if works:
             enrich = STR.enrichment(works, STR.zone_of_points(works, result), result)
@@ -439,7 +538,7 @@ if result:
         # ─── Area Statistics ─────────────────────────────────────────────────
         area_stats = result.get("area_statistics")
         if area_stats:
-            st.markdown('<div class="section-header">📊 Suitability Zone Statistics</div>', unsafe_allow_html=True)
+            _section("Suitability Zone Statistics", "bar_chart")
             total = area_stats.get("total_km2", 0)
             cls = area_stats.get("classes", {})
             cols = st.columns(4)
@@ -464,7 +563,7 @@ if result:
             )
 
         # ─── Top Locations + Criteria Satisfaction ───────────────────────────
-        st.markdown('<div class="section-header">📍 Ideal RWH Sites</div>', unsafe_allow_html=True)
+        _section("Ideal RWH Sites", "location_on")
 
         top_locations = result.get("top_locations_details", [])
         if top_locations:
@@ -475,11 +574,11 @@ if result:
                 for c in satisfied:
                     if c in scores:
                         try:
-                            sat_parts.append(f"{c.capitalize()} ({float(scores[c]) * 100:.1f}%)")
+                            sat_parts.append(f"{criterion_label(c)} ({float(scores[c]) * 100:.1f}%)")
                         except Exception:
-                            sat_parts.append(c.capitalize())
+                            sat_parts.append(criterion_label(c))
                     else:
-                        sat_parts.append(c.capitalize())
+                        sat_parts.append(criterion_label(c))
                 satisfied_str = ", ".join(sat_parts) if sat_parts else "(none)"
 
                 raw = loc.get("raw_values", {}) or {}
@@ -514,7 +613,7 @@ if result:
 
         # ─── Compare Panel ─────────────────────────────────────────────────
         if top_locations and len(top_locations) >= 2:
-            st.markdown('<div class="section-header">⚖️ Compare Candidate Sites</div>', unsafe_allow_html=True)
+            _section("Compare Candidate Sites", "compare_arrows")
 
             weights = result.get("weights", {}) or {}
 
@@ -604,7 +703,7 @@ if result:
                     with r1:
                         st.markdown(
                             f"<div style='color:#e6edf3;'>"
-                            f"<span style='font-family:Space Mono,monospace;'>{c.capitalize()}</span> "
+                            f"<span style='font-family:Space Mono,monospace;'>{criterion_label(c)}</span> "
                             f"<span style='color:#7d8590;'>(w={wa:.3f})</span>"
                             f"</div>",
                             unsafe_allow_html=True,
@@ -627,7 +726,7 @@ if result:
                             )
 
         # ─── Downloads ───────────────────────────────────────────────────────
-        st.markdown('<div class="section-header">⬇️ Export</div>', unsafe_allow_html=True)
+        _section("Export", "download")
         st.markdown(
             "<div style='color:#7d8590; font-size:0.82rem; margin-bottom:8px;'>"
             "Every file embeds the weights, consistency ratio and classification "
@@ -651,8 +750,7 @@ if result:
                                use_container_width=True)
 
         # ─── Sensitivity analysis ────────────────────────────────────────────
-        st.markdown('<div class="section-header">🎯 Sensitivity Analysis</div>',
-                    unsafe_allow_html=True)
+        _section("Sensitivity Analysis", "tune")
         st.markdown(
             "<div style='color:#7d8590; font-size:0.82rem;'>"
             "Varies each weight up and down and measures how far the ranking moves. "
@@ -690,12 +788,13 @@ if result:
                  "retained", "max_rank_shift", "high_pct", "high_pct_delta"]]
             df.columns = ["Criterion", "Dir", "Weight from", "Weight to",
                           f"Retained /{sens['top_n']}", "Max shift", "High %", "Δ High %"]
+            df["Criterion"] = df["Criterion"].map(criterion_label)
             st.dataframe(df, use_container_width=True, hide_index=True)
 
             st.caption(
                 "Influence on highly-suitable area (mean absolute change, "
                 "percentage points): "
-                + " · ".join(f"{k} {v:.2f}" for k, v in sens["influence_high_pct"].items()))
+                + " · ".join(f"{criterion_label(k)} {v:.2f}" for k, v in sens["influence_high_pct"].items()))
 
             mr = st.session_state.get("map_removal")
             if mr:
@@ -711,6 +810,7 @@ if result:
                 mdf.columns = ["Criterion", "Weight", "S index %", "Max %",
                                "Mean |ΔV|", f"Retained /{mr['top_n']}",
                                "High %", "Δ High %"]
+                mdf["Criterion"] = mdf["Criterion"].map(criterion_label)
                 st.dataframe(mdf, use_container_width=True, hide_index=True)
 
             sp = st.session_state.get("single_param")
@@ -729,11 +829,11 @@ if result:
                      "effective_sd", "ratio"]]
                 sdf.columns = ["Criterion", "Theoretical %", "Effective %",
                                "SD", "Ratio"]
+                sdf["Criterion"] = sdf["Criterion"].map(criterion_label)
                 st.dataframe(sdf, use_container_width=True, hide_index=True)
 
         # ─── Consensus across method variations ──────────────────────────────
-        st.markdown('<div class="section-header">🤝 Consensus Sites</div>',
-                    unsafe_allow_html=True)
+        _section("Consensus Sites", "handshake")
         st.markdown(
             "<div style='color:#7d8590; font-size:0.82rem;'>"
             "Which sites survive when the method changes. A site chosen by one "
@@ -805,8 +905,7 @@ if result:
                                        use_container_width=True)
 
         # ─── Algorithm comparison ────────────────────────────────────────────
-        st.markdown('<div class="section-header">🔬 Algorithm Comparison</div>',
-                    unsafe_allow_html=True)
+        _section("Algorithm Comparison", "science")
         st.markdown(
             "<div style='color:#7d8590; font-size:0.82rem;'>"
             "Runs every algorithm on the same criteria stack, so any difference is "
@@ -840,21 +939,21 @@ if result:
                 "(matched by position within 2 km)."
             )
 
-            wrows = [{"Algorithm": r["algorithm"], **{k.capitalize(): v
+            wrows = [{"Algorithm": r["algorithm"], **{criterion_label(k): v
                       for k, v in r["weights"].items()}} for r in comp["rows"]]
             st.markdown("**Weights by algorithm**")
             st.dataframe(pd.DataFrame(wrows), use_container_width=True, hide_index=True)
 
-        st.markdown('<div class="section-header">💡 Notes</div>', unsafe_allow_html=True)
+        _section("Notes", "lightbulb")
         for note in result.get("notes", []):
-            st.markdown(f"• {note}")
+            st.markdown(f"• {_note_markdown(note)}")
 
         with st.expander("AHP Weights", expanded=False):
             if weights:
                 weights_html = '<div class="weights-table"><table style="width:100%; border-collapse: collapse;">'
                 weights_html += '<tr><th style="text-align:left; padding:4px;">Criterion</th><th style="text-align:right; padding:4px;">Weight</th></tr>'
                 for criterion, weight in weights.items():
-                    weights_html += f'<tr><td style="padding:4px;">{criterion.capitalize()}</td><td style="text-align:right; padding:4px;">{weight:.3f}</td></tr>'
+                    weights_html += f'<tr><td style="padding:4px;">{criterion_label(criterion)}</td><td style="text-align:right; padding:4px;">{weight:.3f}</td></tr>'
                 weights_html += '</table></div>'
                 st.markdown(weights_html, unsafe_allow_html=True)
                 cr_verdict = "acceptable (CR < 0.10)" if consistency_ratio < 0.10 else "INCONSISTENT — revise the matrix"
@@ -867,7 +966,7 @@ if result:
             if method:
                 for criterion in sorted(method, key=lambda c: -float(weights.get(c, 0.0))):
                     st.markdown(
-                        f"**{criterion.capitalize()}** (w={float(weights.get(criterion, 0.0)):.3f}) — {method[criterion]}"
+                        f"**{criterion_label(criterion)}** (w={float(weights.get(criterion, 0.0)):.3f}) — {method[criterion]}"
                     )
                 st.markdown(
                     "<div style='color:#7d8590; font-size:0.82rem; margin-top:8px;'>"
@@ -883,6 +982,6 @@ if result:
     else:
         st.error("Analysis failed. Check data files and try again.")
         for note in result.get("notes", []):
-            st.markdown(f"• {note}")
+            st.markdown(f"• {_note_markdown(note)}")
 
 # No prompt/extra footer: single-button workflow

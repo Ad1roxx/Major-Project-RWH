@@ -9,6 +9,40 @@ Earlier history, reconstructed before this file existed, is in
 
 ---
 
+## 2026-11-02 — UI overhaul, phase 1 (branch `ui-overhaul`)
+
+Display only. Plan in `docs/UI_OVERHAUL_PLAN.md`, element checklist in
+`docs/UI_INVENTORY.md`, screenshots in `docs/ui_after/phase1/`.
+
+- **Fixed dark theme** (`.streamlit/config.toml`) with a neutral accent. The sidebar
+  and top bar no longer go light in a light-mode browser.
+- **Map panels** (`utils/map_panels.js`): the legend, layer box and Data layer panel
+  collapse and remember it; they start collapsed when the map is under 900 px wide.
+  The layer box is dark, with grouped overlays. The title is no longer clipped, and
+  the data-layer legend moved to the bottom centre.
+- **Popups:** panels a popup overlaps collapse until it closes, and popups pan clear
+  of the rest. Sticky tooltips can still pass under an expanded panel.
+- **MGNREGA works now start off.** `FastMarkerCluster`'s template ignores
+  `show=False`, so it now sits inside a `FeatureGroup`.
+- **Pairwise matrix editor** moved to a dialog with a live CR preview and Apply and
+  Cancel. As before, an edit is dropped when the scenario changes.
+- **Map cache** (`_map_cache`): the map is rebuilt only when the result, matrix or
+  scenario changes, so other widgets no longer reload it and reset its view. A
+  "Building map..." spinner fills the slot while it builds.
+- **Material icons** replace emoji, and `utils/labels.py` is the one source of human
+  criterion labels. Export column names are unchanged.
+- **Unchanged on purpose:** the scoring matrix is still built from the editor's table
+  rounded to 3 dp, which is why the app shows CR 0.0236 where the paper's unrounded
+  matrix gives 0.0235.
+- `streamlit>=1.37.0`, for `st.dialog`. `tools/smoke_test.py` now covers the dialog
+  and applied edits.
+
+Checked against `main`: metrics, tables and printed numbers are identical across all
+5 scenarios × 4 algorithms and the optional analyses, and `tools/paper_figures.py`
+output is byte-identical.
+
+---
+
 ## 2026-10-20 (night) — Draft v5 checks
 
 - **Printed figure numbers updated** to the v5 numbering, and the figures

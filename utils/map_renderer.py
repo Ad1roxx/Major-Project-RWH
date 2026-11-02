@@ -20,6 +20,7 @@ import os
 
 from utils import data_layers
 from utils import structures as STR
+from utils.labels import criterion_label
 
 try:
     from folium.map import CustomPane
@@ -77,8 +78,8 @@ _DATA_LAYER_CSS = """
   color: #e6edf3; font-family: 'DM Sans', 'Segoe UI', sans-serif; font-size: 12px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.5);
 }
-.rwh-panel { padding: 10px 12px; width: 230px; }
-.rwh-h { font-weight: 700; color: #58a6ff; margin-bottom: 6px; font-size: 13px; }
+.rwh-panel { padding: 7px 10px; width: 230px; }
+.rwh-panel.rwh-collapsed { width: auto; }
 .rwh-panel select {
   width: 100%; background: #0d1117; color: #e6edf3; border: 1px solid #30363d;
   border-radius: 6px; padding: 4px; font-size: 12px; margin-bottom: 6px;
@@ -87,7 +88,13 @@ _DATA_LAYER_CSS = """
 .rwh-row input[type=range] { flex: 1; }
 .rwh-disabled { opacity: 0.45; cursor: default; }
 .rwh-hint { color: #7d8590; font-size: 11px; margin-top: 4px; }
-.rwh-legend { padding: 8px 11px 7px; width: 245px; max-height: 250px; overflow-y: auto; }
+/* Bottom centre, so it never lands on the right-hand panel stack. */
+.leaflet-control.rwh-legend {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  float: none; margin: 0;
+  padding: 8px 11px 7px; width: 245px; max-width: calc(100vw - 24px);
+  max-height: 250px; overflow-y: auto;
+}
 .rwh-lt { font-weight: 700; font-size: 13px; }
 .rwh-unit { color: #7d8590; font-size: 11px; margin-bottom: 6px; }
 .rwh-bar { position: relative; height: 12px; border-radius: 3px; border: 1px solid #30363d; }
@@ -113,6 +120,76 @@ _DATA_LAYER_CSS = """
 .rwh-pop-f { color: #8c959f; font-size: 10.5px; margin-top: 5px; }
 </style>
 """
+
+
+_PANEL_CSS = """
+<style>
+.rwh-box, .leaflet-control-layers.leaflet-control {
+  background: rgba(13,17,23,0.92); border: 1px solid #30363d; border-radius: 10px;
+  color: #e6edf3; font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+.rwh-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  cursor: pointer; user-select: none;
+}
+.rwh-h { font-weight: 700; color: #58a6ff; font-size: 13px; }
+.rwh-toggle {
+  background: none; border: none; color: #c9d1d9; cursor: pointer;
+  font-size: 13px; line-height: 1; padding: 2px 3px; border-radius: 4px;
+}
+.rwh-toggle:hover { background: #30363d; }
+.rwh-toggle:focus-visible { outline: 2px solid #8b949e; }
+.rwh-body { margin-top: 6px; }
+.rwh-collapsed .rwh-body,
+.rwh-collapsed .leaflet-control-layers-list { display: none; }
+
+#rwh-main-legend {
+  position: fixed; bottom: 40px; left: 50px; z-index: 1000;
+  padding: 8px 12px; font-size: 13px; min-width: 215px; max-width: 270px;
+}
+#rwh-main-legend.rwh-collapsed { min-width: 0; }
+#rwh-main-legend .rwh-body { max-height: calc(100vh - 150px); overflow-y: auto; }
+
+#rwh-map-title {
+  position: fixed; top: 12px; left: 56px; z-index: 1000;
+  max-width: calc(100vw - 190px);
+  background: rgba(13,17,23,0.88); border: 1px solid #30363d; border-radius: 8px;
+  padding: 7px 14px; font-family: 'Space Mono', monospace; font-size: 12px;
+  color: #79c0ff; pointer-events: none;
+}
+.rwh-step-aside { visibility: hidden; }
+
+.leaflet-control-layers.leaflet-control { padding: 7px 10px; font-size: 11.5px; }
+.leaflet-control-layers .leaflet-control-layers-list {
+  margin-top: 5px; max-height: calc(100vh - 60px); overflow-y: auto;
+}
+.leaflet-control-layers label { margin: 0; line-height: 1.35; }
+.leaflet-control-layers input { accent-color: #8b949e; }
+.leaflet-control-layers-separator { border-top-color: #30363d; margin: 5px -10px 3px -6px; }
+.rwh-group {
+  color: #7d8590; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px;
+  text-transform: uppercase; margin: 5px 0 1px;
+}
+.leaflet-tooltip { white-space: normal; width: max-content; max-width: 340px; }
+</style>
+"""
+
+
+class _MapPanels(MacroElement):
+    """Injects utils/map_panels.js: collapsible panels and popup clearance."""
+    _template = Template(
+        "{% macro header(this, kwargs) %}{{ this.css }}{% endmacro %}"
+        "{% macro script(this, kwargs) %}{{ this.js }}{% endmacro %}"
+    )
+
+    def __init__(self, map_name: str):
+        super().__init__()
+        self._name = "RwhMapPanels"
+        js_path = os.path.join(os.path.dirname(__file__), "map_panels.js")
+        with open(js_path, encoding="utf-8") as f:
+            self.js = f.read().replace("__MAP__", map_name)
+        self.css = _PANEL_CSS
 
 
 class _DataLayerControls(MacroElement):
@@ -268,15 +345,20 @@ def _add_water_works(m, works: list[dict], zones: list) -> int:
                  "{colours}": [WORK_COLOURS[c] for c in cats],
                  "{prefixes}": prefixes}.items():
         callback = callback.replace(k, json.dumps(v))
-    FastMarkerCluster(
-        rows, callback=callback,
+    # FastMarkerCluster's template always adds itself to its parent and ignores
+    # show=False, so the layer-box entry lives on a FeatureGroup that starts off.
+    fg = folium.FeatureGroup(
         name=(f'<span style="color:{WORK_COLOURS["WC"]};">&#9679;</span>'
               f'<span style="color:{WORK_COLOURS["WH"]};">&#9679;</span> '
               f'MGNREGA water works, WC/WH ({len(rows):,}, unverified)'),
-        show=False, icon_create_function=_CLUSTER_ICON,
+        show=False)
+    FastMarkerCluster(
+        rows, callback=callback, control=False,
+        icon_create_function=_CLUSTER_ICON,
         disableClusteringAtZoom=13, showCoverageOnHover=False,
         chunkedLoading=True,
-    ).add_to(m)
+    ).add_to(fg)
+    fg.add_to(m)
     return len(rows)
 
 
@@ -552,17 +634,17 @@ def render_map(result: dict, stack: dict | None = None,
             for c in sorted(satisfied, key=lambda x: _criterion_sort_key(x, weights)):
                 if c in scores:
                     try:
-                        sat_parts.append(f"{c.capitalize()} ({float(scores[c]) * 100:.1f}%)")
+                        sat_parts.append(f"{criterion_label(c)} ({float(scores[c]) * 100:.1f}%)")
                     except Exception:
-                        sat_parts.append(c.capitalize())
+                        sat_parts.append(criterion_label(c))
                 else:
-                    sat_parts.append(c.capitalize())
+                    sat_parts.append(criterion_label(c))
             sat_str = ", ".join(sat_parts) if sat_parts else "(none)"
 
             score_lines = "".join(
                 [
                     (
-                        f"<li>{k.capitalize()}: {v * 100:.1f}% "
+                        f"<li>{criterion_label(k)}: {v * 100:.1f}% "
                         f"<span style='color:#7d8590'>(w={float(weights.get(k, 0.0)):.3f}, contrib={(float(weights.get(k, 0.0)) * float(v)):.3f})</span></li>"
                     )
                     for k, v in ordered_scores
@@ -572,7 +654,7 @@ def render_map(result: dict, stack: dict | None = None,
             tooltip_lines = "<br>".join(
                 [
                     (
-                        f"{k.capitalize()}: {v * 100:.1f}% "
+                        f"{criterion_label(k)}: {v * 100:.1f}% "
                         f"<span style='color:#7d8590'>(+{(float(weights.get(k, 0.0)) * float(v)):.3f})</span>"
                     )
                     for k, v in ordered_scores
@@ -703,25 +785,12 @@ def render_map(result: dict, stack: dict | None = None,
                         + note + '<div style="height:8px;"></div>')
 
     legend_html = f"""
-    <div style="
-        position: fixed;
-        bottom: 40px; left: 50px;
-        z-index: 1000;
-        background: rgba(13,17,23,0.92);
-        border: 1px solid #30363d;
-        border-radius: 10px;
-        padding: 14px 18px;
-        font-family: 'DM Sans', 'Segoe UI', sans-serif;
-        font-size: 13px;
-        color: #e6edf3;
-        min-width: 230px;
-        max-width: 270px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-    ">
-        <div style="font-weight:700; font-size:14px; margin-bottom:10px; color:#58a6ff;">
-            💧 RWH Suitability Map (AHP)
+    <div id="rwh-main-legend" class="rwh-box">
+        <div class="rwh-head">
+            <span class="rwh-h">RWH Suitability Map (AHP)</span>
+            <button type="button" class="rwh-toggle"></button>
         </div>
-
+        <div class="rwh-body">
         <div style="display:flex; align-items:center; margin-bottom:6px;">
             <div style="width:28px;height:3px;background:#aaa;border:1px dashed #aaa;margin-right:10px;flex-shrink:0;"></div>
             Chandrapur Boundary
@@ -743,7 +812,8 @@ def render_map(result: dict, stack: dict | None = None,
 
         <div style="border-top:1px solid #30363d; padding-top:8px; font-size:11.5px; color:#7d8590;">
             <span style="color:#3fb950;">●</span> Consistency Ratio: <strong style="color:#e6edf3;">{consistency_ratio:.3f}</strong><br>
-            <span style="color:#3fb950;">●</span> Top Factor: <strong style="color:#e6edf3;">{max(weights, key=weights.get).capitalize() if weights else 'N/A'}</strong>
+            <span style="color:#3fb950;">●</span> Top Factor: <strong style="color:#e6edf3;">{criterion_label(max(weights, key=weights.get)) if weights else 'N/A'}</strong>
+        </div>
         </div>
     </div>
     """
@@ -751,23 +821,13 @@ def render_map(result: dict, stack: dict | None = None,
 
     # ── Title overlay ─────────────────────────────────────────────────────────
     title_html = """
-    <div style="
-        position: fixed;
-        top: 12px; left: 50%; transform: translateX(-50%);
-        z-index: 1000;
-        background: rgba(13,17,23,0.88);
-        border: 1px solid #1f6feb;
-        border-radius: 8px;
-        padding: 7px 20px;
-        font-family: 'Space Mono', monospace;
-        font-size: 12px;
-        color: #79c0ff;
-        pointer-events: none;
-    ">
+    <div id="rwh-map-title">
         Chandrapur District · AHP-Based RWH Suitability Analysis
     </div>
     """
     m.get_root().html.add_child(folium.Element(title_html))
+
+    _MapPanels(m.get_name()).add_to(m)
 
     # Return the full HTML document. st.components.v1.html already places it
     # in an iframe; Folium's _repr_html_ would wrap it in a second, base64-

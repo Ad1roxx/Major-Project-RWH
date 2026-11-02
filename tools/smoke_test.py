@@ -48,6 +48,7 @@ def high_pct(app_test) -> str:
 
 
 def main() -> int:
+    import numpy as np
     from streamlit.testing.v1 import AppTest
 
     at = AppTest.from_file(APP, default_timeout=300)
@@ -56,8 +57,27 @@ def main() -> int:
     at.run()
     check(at, "script loads")
 
-    at.button[0].click().run()
+    at.button(key="run_analysis").click().run()
     check(at, f"run analysis (High {high_pct(at)})")
+
+    # The matrix editor opens in a dialog. An applied edit lives in session state
+    # and must re-score; changing scenario must drop it again.
+    at.button(key="matrix_open").click().run()
+    check(at, "matrix dialog opens")
+    baseline_high = high_pct(at)
+    edited = np.ones((6, 6))
+    at.session_state["_matrix_applied"] = {"scenario": "Baseline (rainfall-led)",
+                                           "matrix": edited}
+    at.run()
+    check(at, f"applied matrix re-scores (High {high_pct(at)})")
+    if high_pct(at) == baseline_high:
+        failures.append("applied matrix did not change the result")
+        print("  FAIL  applied matrix did not change the result")
+    del at.session_state["_matrix_applied"]
+    at.run()
+    if high_pct(at) != baseline_high:
+        failures.append("removing the applied matrix did not restore the baseline")
+        print("  FAIL  removing the applied matrix did not restore the baseline")
 
     # Scenario switching re-scores the cached stack.
     at.sidebar.selectbox[0].select("Maximise recharge").run()

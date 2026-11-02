@@ -1,0 +1,9 @@
+# Fixed dark theme, so the app looks the same with the browser or OS in light mode.
+# The accent is neutral because the map already uses colour for meaning: green and
+# red for High and Low, blue for rivers, and orange, pink, yellow and purple rings.
+[theme]
+base = "dark"
+primaryColor = "#8b949e"
+backgroundColor = "#0d1117"
+secondaryBackgroundColor = "#161b22"
+textColor = "#e6edf3"

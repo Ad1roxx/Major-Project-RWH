@@ -80,12 +80,15 @@
         if (inner) { opts += '<optgroup label="' + g[0] + '">' + inner + "</optgroup>"; }
       });
       div.innerHTML =
-        '<div class="rwh-h">Data layer</div>' +
+        '<div class="rwh-head"><span class="rwh-h">Data layer</span>' +
+        '<button type="button" class="rwh-toggle"></button></div>' +
+        '<div class="rwh-body">' +
         '<select id="rwh-layer">' + opts + "</select>" +
         '<label class="rwh-row" id="rwh-score-row" title="Show the 0–1 score the model gives this criterion instead of the measured value">' +
         '<input type="checkbox" id="rwh-score"> Show model score (0–1)</label>' +
         '<label class="rwh-row">Opacity <input type="range" id="rwh-opacity" min="0" max="100" value="80"></label>' +
-        '<div class="rwh-hint">Click anywhere in the district to read its values.</div>';
+        '<div class="rwh-hint">Click anywhere in the district to read its values.</div>' +
+        "</div>";
       L.DomEvent.disableClickPropagation(div);
       L.DomEvent.disableScrollPropagation(div);
       return div;
@@ -282,6 +285,7 @@
       });
       h += "</table><div class=\"rwh-pop-f\">Cell of the ≈300 m analysis grid.</div>";
       popup.setContent(h);
+      map.fire("rwhpopupcontent");   // it just grew; utils/map_panels.js rechecks the panels
     }).catch(function () {
       popup.setContent("<b>" + where + "</b><br>Value readout needs a recent browser (Chrome, Edge, Firefox or Safari 16.4+).");
     });

@@ -46,6 +46,7 @@ algorithms and sensitivity cheap. Side branch: `derived_maps.py` → hydrology s
 | `consensus.py` | Consensus sites (Borda) + agreement raster across algorithms/scenarios |
 | `app.py` | Streamlit entry point |
 | `utils/map_renderer.py` | Folium map, legend, site popups |
+| `utils/map_panels.js`, `utils/labels.py` | Collapsible map panels and popup clearance; human criterion labels |
 | `build_rainfall.py` | CHIRPS annual/monthly → `data/rainfall.tif` |
 | `derived_maps.py` | SCS-CN runoff and drainage surfaces → `outputs/` |
 | `tools/inspect.py` | Data profiling CLI · `tools/smoke_test.py` end-to-end app test |

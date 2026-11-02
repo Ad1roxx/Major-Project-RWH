@@ -159,6 +159,14 @@ buffer, so the matrix editor must copy with `np.array(..., copy=True)` before
 enforcing reciprocity. If it reappears, something changed `np.array` back to
 `np.asarray` in `app.py`.
 
+**The app is light, or the sidebar looks wrong**
+The dark theme is in `.streamlit/config.toml`, which Streamlit only reads from the
+folder you start it in. Start it from the repo root.
+
+**Map panels start collapsed, or stay collapsed**
+They start collapsed when the map is under 900 px wide, and then remember your
+choice in the browser. Click a panel's header to change it.
+
 **I changed the app and want to know it still works**
 `python tools/smoke_test.py`. Note that `streamlit run app.py` starting
 successfully proves very little — the script body does not execute until a
