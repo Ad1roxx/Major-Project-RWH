@@ -140,11 +140,73 @@
     });
   });
 
+  // ── View and layers survive changing page ────────────────────────────────
+  // Leaving the Map page destroys this iframe, so its state is kept for the tab.
+  var VIEW_KEY = "rwh.mapstate";
+
+  // Layer names can hold live text in brackets, such as the selected algorithm.
+  function layerName(label) {
+    return label.textContent.split("(")[0].replace(/\s+/g, " ").trim();
+  }
+
+  function saveState() {
+    var s = { center: map.getCenter(), zoom: map.getZoom(), checks: {} };
+    document.querySelectorAll(".leaflet-control-layers label").forEach(function (l) {
+      var input = l.querySelector("input");
+      if (input) { s.checks[layerName(l)] = input.checked; }
+    });
+    var sel = document.getElementById("rwh-layer");
+    if (sel) {
+      s.layer = sel.value;
+      s.score = document.getElementById("rwh-score").checked;
+      s.opacity = document.getElementById("rwh-opacity").value;
+    }
+    try { window.sessionStorage.setItem(VIEW_KEY, JSON.stringify(s)); } catch (e) { /* private mode */ }
+  }
+
+  function startSaving() {
+    map.on("moveend overlayadd overlayremove baselayerchange", saveState);
+    var data = document.querySelector(".rwh-panel");
+    if (data) { data.addEventListener("change", saveState); data.addEventListener("input", saveState); }
+  }
+
+  function restoreState() {
+    var s = null;
+    try { s = JSON.parse(window.sessionStorage.getItem(VIEW_KEY)); } catch (e) { /* none saved */ }
+    if (!s) { startSaving(); return; }
+
+    // The map's first fit to the district animates, and ending would undo a view
+    // set now, so a restored view waits for it. Saving starts only after that.
+    function restoreView() {
+      map.setView(s.center, s.zoom, { animate: false });
+      startSaving();
+    }
+    if (map._animatingZoom) { map.once("zoomend", restoreView); } else { restoreView(); }
+
+    document.querySelectorAll(".leaflet-control-layers label").forEach(function (l) {
+      var input = l.querySelector("input"), want = s.checks[layerName(l)];
+      if (input && want !== undefined && input.checked !== want && (input.type === "checkbox" || want)) {
+        input.click();
+      }
+    });
+    var sel = document.getElementById("rwh-layer");
+    if (sel && s.layer && sel.querySelector('option[value="' + s.layer + '"]')) {
+      var opacity = document.getElementById("rwh-opacity"), score = document.getElementById("rwh-score");
+      opacity.value = s.opacity;
+      opacity.dispatchEvent(new Event("input"));
+      sel.value = s.layer;
+      sel.dispatchEvent(new Event("change"));
+      if (score.checked !== s.score && !score.disabled) { score.click(); }
+    }
+  }
+
   window.setTimeout(function () {
     setUpLayerBox();
     var legend = document.getElementById("rwh-main-legend");
     if (legend) { wire("legend", legend, "map legend"); }
     var data = document.querySelector(".rwh-panel");
     if (data) { wire("data", data, "data layer panel"); }
+
+    restoreState();
   }, 0);
 })();

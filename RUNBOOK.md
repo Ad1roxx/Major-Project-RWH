@@ -14,8 +14,9 @@ venv\Scripts\Activate.ps1
 streamlit run app.py
 ```
 
-Browser opens at `http://localhost:8501`. **Click "Run Suitability Analysis"** —
-nothing renders until you do. `Ctrl+C` in the terminal stops it.
+Browser opens at `http://localhost:8501`. **Click "Run Suitability Analysis"** in
+the sidebar — every page shows a prompt until you do. `Ctrl+C` in the terminal stops
+it.
 
 ---
 
@@ -123,9 +124,10 @@ python tools/inspect.py data/rivers.geojson --rows 3
 Never open rasters by reading them wholesale — this prints ~20 lines instead.
 
 **Demo for the guide**
-Start the app, click Run, then walk through: map → zone statistics → ranked
-sites → change Scenario in the sidebar (map updates in ~0.15 s) → change
-Algorithm → Compare all algorithms → Run sensitivity → download the CSV.
+Start the app, click Run, then walk through: Map page (zone statistics, map) →
+Candidate sites → change Scenario in the sidebar (re-scores in ~0.15 s) → change
+Algorithm → Robustness (Run sensitivity, Compare all algorithms) → Method (download
+the CSV).
 
 ---
 

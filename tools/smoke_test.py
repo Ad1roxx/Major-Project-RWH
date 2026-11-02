@@ -26,6 +26,8 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:] = [p for p in sys.path if os.path.abspath(p or os.getcwd()) != _HERE]
 
 APP = os.path.join(os.path.dirname(_HERE), "app.py")
+PAGES = ["views/map.py", "views/sites.py", "views/robustness.py",
+         "views/agreement.py", "views/method.py"]
 
 failures: list[str] = []
 
@@ -56,6 +58,16 @@ def main() -> int:
     print("Streamlit app smoke test")
     at.run()
     check(at, "script loads")
+
+    # Before any analysis, every page shows the empty state, not a blank area.
+    # Method also lists what it knows without a result.
+    for page in PAGES:
+        at.switch_page(page).run()
+        check(at, f"empty state: {page}")
+        if not any("Run the analysis" in i.value for i in at.info):
+            failures.append(f"no empty state on {page}")
+            print(f"  FAIL  no empty state on {page}")
+    at.switch_page(PAGES[0]).run()
 
     at.button(key="run_analysis").click().run()
     check(at, f"run analysis (High {high_pct(at)})")
@@ -108,6 +120,11 @@ def main() -> int:
     else:
         print(f"  ok    rank ordering (1..{len(sites)}, scores descending)")
 
+    for page in PAGES:
+        at.switch_page(page).run()
+        check(at, f"page renders: {page}")
+
+    at.switch_page("views/method.py").run()
     n_downloads = len(at.get("download_button"))
     if n_downloads < 4:
         failures.append(f"expected 4 download buttons, found {n_downloads}")
@@ -115,6 +132,7 @@ def main() -> int:
     else:
         print(f"  ok    export buttons ({n_downloads})")
 
+    at.switch_page("views/robustness.py").run()
     labels = [b.label for b in at.button]
     for want in ("Run sensitivity", "Compute consensus", "Compare all algorithms"):
         idx = [i for i, lab in enumerate(labels) if lab == want]
@@ -125,6 +143,36 @@ def main() -> int:
         at.button[idx[0]].click().run()
         check(at, want)
         labels = [b.label for b in at.button]
+
+    # Results and page widgets survive changing page; nothing reruns on the way.
+    at.radio(key="consensus_axis").set_value("Scenarios").run()
+    at.select_slider(key="sens_delta").set_value(30).run()
+    n_tables = len(at.dataframe)
+    at.switch_page("views/method.py").run()
+    at.switch_page("views/robustness.py").run()
+    kept = (at.radio(key="consensus_axis").value == "Scenarios"
+            and at.select_slider(key="sens_delta").value == 30
+            and len(at.dataframe) == n_tables)
+    if not kept:
+        failures.append("robustness state lost after changing page")
+    print(f"  {'ok  ' if kept else 'FAIL'}  robustness results and widgets survive changing page")
+
+    at.switch_page("views/sites.py").run()
+    site_b = at.selectbox(key="compare_site_b")
+    choice = site_b.options[4]
+    site_b.set_value(choice).run()
+    at.switch_page("views/method.py").run()
+    at.switch_page("views/sites.py").run()
+    kept = at.selectbox(key="compare_site_b").value == choice
+    if not kept:
+        failures.append("site comparison choice lost after changing page")
+    print(f"  {'ok  ' if kept else 'FAIL'}  site choice survives changing page")
+
+    # A remembered site label dies with its scenario; this must fall back, not crash.
+    at.sidebar.selectbox[0].select("Fertile farmland").run()
+    check(at, "site page re-scores after a scenario change")
+    at.sidebar.selectbox[0].select("Baseline (rainfall-led)").run()
+    check(at, "and back")
 
     partition_problems = check_transition_partition()
     if partition_problems:

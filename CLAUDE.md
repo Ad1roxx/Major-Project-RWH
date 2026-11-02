@@ -47,6 +47,7 @@ algorithms and sensitivity cheap. Side branch: `derived_maps.py` → hydrology s
 | `app.py` | Streamlit entry point |
 | `utils/map_renderer.py` | Folium map, legend, site popups |
 | `utils/map_panels.js`, `utils/labels.py` | Collapsible map panels and popup clearance; human criterion labels |
+| `views/`, `utils/ui.py` | The five pages (`app.py` holds the sidebar and scoring); helpers they share |
 | `build_rainfall.py` | CHIRPS annual/monthly → `data/rainfall.tif` |
 | `derived_maps.py` | SCS-CN runoff and drainage surfaces → `outputs/` |
 | `tools/inspect.py` | Data profiling CLI · `tools/smoke_test.py` end-to-end app test |

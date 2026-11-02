@@ -6,7 +6,7 @@ pyproj>=3.5.0
 fiona>=1.9.0
 
 # ─── Web App ──────────────────────────────────────────────────────────────────
-streamlit>=1.37.0    # st.dialog
+streamlit>=1.37.0,<1.62    # st.dialog; st.components.v1.html is deprecated upstream
 folium>=0.16.0
 
 # ─── Data ─────────────────────────────────────────────────────────────────────

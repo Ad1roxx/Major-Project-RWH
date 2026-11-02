@@ -9,6 +9,37 @@ Earlier history, reconstructed before this file existed, is in
 
 ---
 
+## 2026-11-02 — UI overhaul, phase 2 (branch `ui-overhaul`)
+
+Display only. Screenshots in `docs/ui_after/phase2/`.
+
+- **Five pages** with `st.navigation`: Map, Candidate sites, Robustness (tabs:
+  Sensitivity, Consensus, Algorithm comparison), Agreement with recorded works, and
+  Method. `app.py` now holds only page setup, the sidebar and scoring; the shared
+  helpers moved to `utils/ui.py` and the page bodies to `views/`.
+- **Run button in the sidebar**, usable from every page. Scoring and auto re-scoring
+  run in `app.py`, so every page reads the same result.
+- **Page widgets remembered** across pages with `_keep_<widget>` mirrors. A remembered
+  site label is dropped if the scenario changed it.
+- **Map:** built only when the result, matrix or scenario changes, and only on the Map
+  page. Its zoom, position, layers and data layer are restored after changing page
+  (`sessionStorage`, in `utils/map_panels.js`). Height is 620 px.
+- **Exports are on Method** and built only there, so other pages no longer generate
+  the GeoTIFF and PNG on every rerun. Candidate sites links to them.
+- **Data status:** all rows on Method; the sidebar keeps a one-line count and link.
+- **Empty state on every page** before a run. A failed run's error shows on every page.
+- **Under the map**, the works caption is now one line keeping "category codes" and
+  "not an accuracy measure". The full caption is on the Agreement page.
+- `streamlit>=1.37.0,<1.62`: `st.components.v1.html` is deprecated, and later versions
+  may remove it.
+- `tools/smoke_test.py` covers every page, empty states and remembered values.
+
+Checked against `main`: every metric, table, caption and printed number it showed
+appears in the new app, in all 24 states tested. `tools/paper_figures.py` output is
+byte-identical.
+
+---
+
 ## 2026-11-02 — UI overhaul, phase 1 (branch `ui-overhaul`)
 
 Display only. Plan in `docs/UI_OVERHAUL_PLAN.md`, element checklist in
