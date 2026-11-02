@@ -9,6 +9,26 @@ Earlier history, reconstructed before this file existed, is in
 
 ---
 
+## 2026-11-02 — Site picker, view on map, robustness labels (branch `ui-overhaul`)
+
+- **Candidate sites can list any method and scenario** without changing the sidebar or
+  the map. The page shows that combination's top 10, comparison list, and weights
+  with changes against the baseline. `tools/smoke_test.py` confirms the first site
+  matches the sidebar's result for all 20 combinations.
+- **View on map** on each listed site: moves the sidebar to that site's combination,
+  so the map's zones and candidate sites match it, then opens the Map page zoomed in
+  with a marker and popup. It drops an edited matrix if the site came from another
+  combination. "Clear marker" removes the marker.
+- **Robustness results say what they were computed for**, and warn when the sidebar
+  no longer matches. What counts as out of date follows what each analysis uses:
+  - sensitivity uses the weights and the slider, and always scores with WLC, even
+    when TOPSIS is selected (noted on screen);
+  - consensus holds either the scenario or the method fixed, and uses default
+    matrices, not an edited one (noted on screen);
+  - algorithm comparison uses the current matrix.
+
+---
+
 ## 2026-11-02 — UI overhaul, phase 2 (branch `ui-overhaul`)
 
 Display only. Screenshots in `docs/ui_after/phase2/`.

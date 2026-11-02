@@ -1,4 +1,6 @@
 """Map page: zone statistics, the suitability map, and its agreement line."""
+import json
+
 import numpy as np
 import streamlit as st
 
@@ -71,8 +73,30 @@ if not map_cache or map_cache["key"] != map_key:
                               confirmed_structures=STR.load_confirmed())
     map_cache = {"key": map_key, "html": map_html}
     st.session_state["_map_cache"] = map_cache
+
+# ─── A site sent here from the Candidate sites page ──────────────────────────
+focus = st.session_state.get("_map_focus")
+page_html = map_cache["html"]
+if focus:
+    # Read by utils/map_panels.js, which marks the site and flies there once.
+    page_html = page_html.replace(
+        "<head>", f"<head><script>window.RWH_FOCUS = {json.dumps(focus)};</script>", 1)
 with map_slot:
-    st.components.v1.html(map_cache["html"], height=620)
+    st.components.v1.html(page_html, height=620)
+if focus:
+    note_col, clear_col = st.columns([5, 1])
+    with note_col:
+        text = (f"Marked on the map: Rank #{focus['rank']} of {focus['method']} · "
+                f"{focus['scenario']}, score {focus['score']:.3f}.")
+        if (focus["method"], focus["scenario"]) != (active["algorithm"], active["scenario"]):
+            text += (f" The sidebar has since changed to {active['algorithm']} · "
+                     f"{active['scenario']}, so the zones and candidate sites may not "
+                     f"match this site.")
+        st.caption(text)
+    with clear_col:
+        if st.button("Clear marker", key="map_focus_clear", use_container_width=True):
+            del st.session_state["_map_focus"]
+            st.rerun()
 
 enrich = ui.works_enrichment(result)
 if enrich:

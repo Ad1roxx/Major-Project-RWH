@@ -1,6 +1,11 @@
-"""Candidate sites page: site cards, farmland context, Site A against Site B."""
+"""Candidate sites page: site cards for any method and scenario, farmland context,
+Site A against Site B, and a jump to each site on the map."""
+import time
+
 import streamlit as st
 
+from ahp import SCENARIOS
+from algorithms import ALGORITHMS
 from utils import structures as STR
 from utils import ui
 from utils.labels import criterion_label
@@ -29,13 +34,48 @@ def site_context_html(ctx: dict | None) -> str:
     return ("<br><span style='color:#79c0ff;'>" + " · ".join(bits) + "</span>" + farm)
 
 
-result = ui.require_result()
-site_ctx = ui.site_contexts(result)
+sidebar_result = ui.require_result()
+active = ui.active()
+
+# ─── Which combination to list ───────────────────────────────────────────────
+# Independent of the sidebar, so sites can be browsed without changing the map.
+SAME = "Same as sidebar"
+scenario_options = [SAME] + list(SCENARIOS)
+method_options = [SAME] + list(ALGORITHMS)
+ui.restore_widget("sites_scenario", scenario_options, SAME)
+ui.restore_widget("sites_method", method_options, SAME)
+pick_scenario, pick_method = st.columns(2)
+with pick_scenario:
+    chosen_scenario = st.selectbox("List sites for scenario", scenario_options, key="sites_scenario",
+                                   on_change=ui.remember_widget, args=("sites_scenario",))
+with pick_method:
+    chosen_method = st.selectbox("Using method", method_options, key="sites_method",
+                                 on_change=ui.remember_widget, args=("sites_method",))
+
+list_scenario = active["scenario"] if chosen_scenario == SAME else chosen_scenario
+list_method = active["algorithm"] if chosen_method == SAME else chosen_method
+
+if (list_scenario, list_method) == (active["scenario"], active["algorithm"]):
+    # Includes any matrix edit, because this is the sidebar's own result.
+    result = sidebar_result
+    site_ctx = ui.site_contexts(result)
+else:
+    with st.spinner(f"Scoring {list_method} · {list_scenario}…"):
+        result = ui.combination_result(list_scenario, list_method)
+        site_ctx = ui.site_contexts(result, list_scenario, list_method)
+
+about_col, weights_col = st.columns(2)
+with about_col:
+    st.caption(SCENARIOS[list_scenario]["rationale"])
+    st.caption(ALGORITHMS[list_method]["note"])
+with weights_col:
+    st.markdown(ui.weights_changes_html(result.get("weights", {}), ui.baseline_weights()),
+                unsafe_allow_html=True)
 
 # ─── Top Locations + Criteria Satisfaction ───────────────────────────────────
 ui.section("Ideal RWH Sites", "location_on",
-           f'<span style="font-size:0.75rem; color:#7d8590;"> · {result.get("algorithm", "")} '
-           f'· {st.session_state.get("scenario", "")}</span>')
+           f'<span style="font-size:0.75rem; color:#7d8590;"> · {list_method} '
+           f'· {list_scenario}</span>')
 
 top_locations = result.get("top_locations_details", [])
 if top_locations:
@@ -80,6 +120,21 @@ if top_locations:
             """,
             unsafe_allow_html=True,
         )
+        if st.button("View on map", key=f"view_site_{loc['rank']}", icon=":material/my_location:"):
+            st.session_state["_map_focus"] = {
+                "id": str(time.time()),      # each click flies there, even to the same site
+                "lat": float(loc["lat"]), "lon": float(loc["lon"]),
+                "rank": loc["rank"], "score": float(loc["suitability_score"]),
+                "method": list_method, "scenario": list_scenario,
+            }
+            # The map follows the site's combination. app.py applies this before it
+            # draws the sidebar. The site came from default weights, so an edited
+            # matrix can't stay in use for it.
+            if result is not sidebar_result:
+                st.session_state["_pending_sidebar"] = {"scenario": list_scenario,
+                                                        "algorithm": list_method}
+                st.session_state.pop("_matrix_applied", None)
+            st.switch_page("views/map.py")
 else:
     st.info("No ideal sites extracted - check data availability")
 

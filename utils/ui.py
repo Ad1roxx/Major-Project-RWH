@@ -243,18 +243,98 @@ def works_enrichment(result: dict) -> dict | None:
     return enrich if enrich and enrich["High"]["area_pct"] else None
 
 
-def site_contexts(result: dict) -> dict:
-    """Farmland scenario: water and farmland context for each candidate site."""
+def site_contexts(result: dict, scenario: str | None = None,
+                  algorithm: str | None = None) -> dict:
+    """Farmland scenario: water and farmland context for each candidate site.
+
+    With no scenario, this is the sidebar's result. Otherwise it's that
+    combination's, from combination_result.
+    """
     from gis_analysis import build_criteria_stack
-    key = (st.session_state.get("result_key"), st.session_state.get("scenario"))
+    if scenario is None:
+        scenario = st.session_state.get("scenario")
+        key = ("sidebar", st.session_state.get("result_key"), scenario)
+    else:
+        key = ("combination", scenario, algorithm)
     cached = st.session_state.get("_site_ctx")
     if cached and cached["key"] == key:
         return cached["sites"]
     sites = {}
-    if st.session_state.get("scenario") == FARMLAND_SCENARIO:
+    if scenario == FARMLAND_SCENARIO:
         stack = build_criteria_stack(DATA_DIR)
         works, confirmed = STR.load_water_works(), STR.load_confirmed()
         sites = {loc["rank"]: STR.site_context(loc, stack, works, confirmed)
                  for loc in (result.get("top_locations_details") or [])[:25]}
     st.session_state["_site_ctx"] = {"key": key, "sites": sites}
     return sites
+
+
+# ── A method and scenario other than the sidebar's ───────────────────────────
+def default_matrix(scenario: str) -> np.ndarray:
+    """A scenario's scoring matrix, built exactly as the sidebar builds it."""
+    return reciprocal_matrix(matrix_table(ahp_engine.matrix_for_scenario(scenario)))
+
+
+def combination_result(scenario: str, algorithm: str) -> dict:
+    """Top sites and weights of one method and scenario, without touching the
+    sidebar's result. Kept per combination, because only these fields are needed.
+    """
+    from algorithms import weights_for_algorithm
+    from gis_analysis import build_criteria_stack, score_stack
+    cache = st.session_state.setdefault("_sites_combinations", {})
+    key = (scenario, algorithm)
+    if key not in cache:
+        matrix = default_matrix(scenario)
+        weights, aggregator, _label = weights_for_algorithm(algorithm, matrix, ahp_engine.criteria)
+        _crisp, cr = ahp_engine.calculate_weights(matrix)
+        res = score_stack(build_criteria_stack(DATA_DIR), weights, cr,
+                          aggregator=aggregator, algorithm=algorithm)
+        cache[key] = {"top_locations_details": res.get("top_locations_details", []),
+                      "weights": res.get("weights", {})}
+    return cache[key]
+
+
+def baseline_weights() -> dict:
+    """The weights every combination's changes are shown against."""
+    from algorithms import ALGORITHMS, weights_for_algorithm
+    weights, _agg, _label = weights_for_algorithm(
+        list(ALGORITHMS)[0], default_matrix(list(SCENARIOS)[0]), ahp_engine.criteria)
+    return weights
+
+
+def weights_changes_html(weights: dict, base: dict) -> str:
+    """A combination's weights, largest first, with changes against the baseline."""
+    rows = []
+    for c in sorted(weights, key=weights.get, reverse=True):
+        w, b = float(weights[c]), float(base[c])
+        change = ""
+        if abs(w - b) >= 0.01:
+            arrow, col = ("▲", "#3fb950") if w > b else ("▼", "#f85149")
+            change = f"<span style='color:{col};'>{arrow} from {b:.2f}</span>"
+        rows.append(
+            f"<tr><td style='padding:1px 10px 1px 0;'>{criterion_label(c)}</td>"
+            f"<td style='text-align:right;padding:1px 10px;'><b>{w:.3f}</b></td>"
+            f"<td style='font-size:0.78rem;'>{change}</td></tr>")
+    return ("<table style='font-size:0.82rem;'>" + "".join(rows) + "</table>"
+            "<div style='color:#7d8590;font-size:0.78rem;margin-top:4px;'>"
+            "Arrows compare with the baseline weights.</div>")
+
+
+# ── Robustness results: what they were computed for ──────────────────────────
+def setup_note(computed_for: str, stale: bool, button: str) -> None:
+    """Say which setup a stored result belongs to, and warn if that's not current."""
+    if stale:
+        st.warning(f"Out of date: computed for {computed_for}. The sidebar has changed "
+                   f"since, so press **{button}** to update.", icon=":material/history:")
+    else:
+        st.caption(f"Computed for: {computed_for}")
+
+
+def matrix_is_edited() -> bool:
+    return "_matrix_applied" in st.session_state
+
+
+def scenario_label() -> str:
+    """The sidebar's scenario, marked if its matrix has been edited."""
+    scenario = st.session_state.get("scenario", "")
+    return f"{scenario} (edited matrix)" if matrix_is_edited() else scenario

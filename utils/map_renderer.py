@@ -172,6 +172,8 @@ _PANEL_CSS = """
   text-transform: uppercase; margin: 5px 0 1px;
 }
 .leaflet-tooltip { white-space: normal; width: max-content; max-width: 340px; }
+@keyframes rwh-pulse { 50% { stroke-opacity: 0.25; } }
+.rwh-focus-ring { animation: rwh-pulse 1.6s ease-in-out infinite; }
 </style>
 """
 

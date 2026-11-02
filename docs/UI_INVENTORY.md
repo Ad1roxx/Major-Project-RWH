@@ -82,6 +82,14 @@ Tables keep Streamlit's built-in sort, search, download and fullscreen tools.
 | 58 | Main legend: symbols, ring key, works statistics, CR, top factor | Bottom left | Same, collapsible | Map page; view, layers and data layer restored after changing page |
 | 59 | Map title | Top centre, clipped | Top left, unclipped | Map page; view, layers and data layer restored after changing page |
 
+## Added after phase 2
+
+| # | Element | Location |
+|---|---|---|
+| 60 | "List sites for scenario" and "Using method" dropdowns (keys `sites_scenario`, `sites_method`), rationale, method note, weights with changes against the baseline | Candidate sites |
+| 61 | "View on map" on each listed site, marker and popup, note, "Clear marker" button | Candidate sites; Map page |
+| 62 | "Computed for" line or "Out of date" warning on each robustness result, WLC and edited-matrix notes | Robustness, all three tabs |
+
 ## Session-state keys that must keep their meaning
 
 Results: `analysis_result`, `result_key`, `algo_sites`, `algo_sites_key`,
@@ -89,6 +97,8 @@ Results: `analysis_result`, `result_key`, `algo_sites`, `algo_sites_key`,
 
 Widgets: `scenario`, `algorithm`, `compare_site_a`, `compare_site_b`,
 `consensus_axis`, `matrix_editor_<scenario>`.
+
+Added after phase 2: `sites_scenario`, `sites_method`, `_sites_combinations`, `_map_focus`, `_sensitivity_for`, `_consensus_for`, `_consensus_new`, `_comparison_for`.
 
 Added in phase 2: `_active` (what the sidebar chose on this run), `_site_ctx`, `sens_delta`
 (the sensitivity slider), and `_keep_<widget>` mirrors for `compare_site_a`,

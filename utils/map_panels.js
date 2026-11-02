@@ -170,18 +170,46 @@
     if (data) { data.addEventListener("change", saveState); data.addEventListener("input", saveState); }
   }
 
+  // A site sent from the Candidate sites page: always marked, flown to once.
+  var FOCUS_KEY = "rwh.mapfocus";
+  var FOCUS_ZOOM = 13;
+
+  function focusMarker(f) {
+    var pane = map.createPane("rwhFocusPane");
+    pane.style.zIndex = 490;
+    return L.circleMarker([f.lat, f.lon], {
+      pane: "rwhFocusPane", radius: 15, color: "#ffffff", weight: 3, fill: true,
+      fillOpacity: 0, className: "rwh-focus-ring"
+    }).bindPopup(
+      "<div style='font-family:DM Sans,Segoe UI,sans-serif;font-size:12px;'><b>Rank #" + f.rank +
+      "</b> &middot; " + Number(f.score).toFixed(3) + "<br>" + f.method + " &middot; " + f.scenario +
+      "<br>" + Number(f.lat).toFixed(4) + "&deg;N, " + Number(f.lon).toFixed(4) + "&deg;E</div>"
+    ).addTo(map);
+  }
+
   function restoreState() {
-    var s = null;
-    try { s = JSON.parse(window.sessionStorage.getItem(VIEW_KEY)); } catch (e) { /* none saved */ }
-    if (!s) { startSaving(); return; }
+    var s = null, f = window.RWH_FOCUS, seen = null;
+    try {
+      s = JSON.parse(window.sessionStorage.getItem(VIEW_KEY));
+      seen = window.sessionStorage.getItem(FOCUS_KEY);
+    } catch (e) { /* none saved */ }
+    var marker = f ? focusMarker(f) : null;
+    var fly = f && seen !== f.id;
 
     // The map's first fit to the district animates, and ending would undo a view
-    // set now, so a restored view waits for it. Saving starts only after that.
-    function restoreView() {
-      map.setView(s.center, s.zoom, { animate: false });
+    // set now, so a view waits for it. Saving starts only after that.
+    function setStartView() {
+      if (fly) {
+        try { window.sessionStorage.setItem(FOCUS_KEY, f.id); } catch (e) { /* private mode */ }
+        map.setView([f.lat, f.lon], FOCUS_ZOOM, { animate: false });
+        marker.openPopup();
+      } else if (s) {
+        map.setView(s.center, s.zoom, { animate: false });
+      }
       startSaving();
     }
-    if (map._animatingZoom) { map.once("zoomend", restoreView); } else { restoreView(); }
+    if (map._animatingZoom) { map.once("zoomend", setStartView); } else { setStartView(); }
+    if (!s) { return; }
 
     document.querySelectorAll(".leaflet-control-layers label").forEach(function (l) {
       var input = l.querySelector("input"), want = s.checks[layerName(l)];

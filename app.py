@@ -144,6 +144,24 @@ html, body, [class*="css"] {
     background: #c9d1d9 !important;
 }
 
+[class*="st-key-view_site_"] {
+    margin-top: -10px;
+}
+
+[class*="st-key-view_site_"] button {
+    background: none !important;
+    border: none !important;
+    color: #79c0ff !important;
+    padding: 0 4px !important;
+    min-height: 0 !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+}
+
+[class*="st-key-view_site_"] button:hover {
+    background: #30363d !important;
+}
+
 .sidebar-title {
     font-family: 'Space Mono', monospace;
     font-size: 0.85rem;
@@ -184,6 +202,10 @@ div[data-testid="stExpander"] {
 # ─── Header ───────────────────────────────────────────────────────────────────
 st.markdown(f'<div class="main-title">{ui.icon("water_drop")}RWH Suitability Analysis</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">AHP-based Multi-Criteria Decision System · Chandrapur District</div>', unsafe_allow_html=True)
+
+# "View on map" asked for a site's combination. A widget's value can only be set
+# before the widget is drawn, so this has to come first.
+st.session_state.update(st.session_state.pop("_pending_sidebar", {}))
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:

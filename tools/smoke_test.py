@@ -168,6 +168,39 @@ def main() -> int:
         failures.append("site comparison choice lost after changing page")
     print(f"  {'ok  ' if kept else 'FAIL'}  site choice survives changing page")
 
+    # The Candidate sites picker must give what the sidebar gives for that combination.
+    bad = check_site_combinations(at)
+    if bad:
+        failures.extend(bad)
+    print(f"  {'FAIL' if bad else 'ok  '}  site picker matches the sidebar for all combinations")
+
+    # View on map moves the sidebar to the site's combination, and the map follows.
+    at.switch_page("views/sites.py").run()
+    at.selectbox(key="sites_scenario").select("Fertile farmland")
+    at.selectbox(key="sites_method").select("AHP + TOPSIS")
+    at.run()
+    at.button(key="view_site_1").click().run()
+    check(at, "view on map")
+    followed = (at.sidebar.selectbox[0].value == "Fertile farmland"
+                and at.sidebar.selectbox[1].value == "AHP + TOPSIS"
+                and at.session_state["_map_cache"]["key"][0][0] == "AHP + TOPSIS")
+    if not followed:
+        failures.append("the map did not follow the site's combination")
+    print(f"  {'ok  ' if followed else 'FAIL'}  map follows the site's combination")
+    if not any(b.key == "map_focus_clear" for b in at.button):
+        failures.append("view on map did not reach the map page")
+        print("  FAIL  view on map did not reach the map page")
+    else:
+        at.button(key="map_focus_clear").click().run()
+        check(at, "marker cleared")
+    at.sidebar.selectbox[0].select("Baseline (rainfall-led)")
+    at.sidebar.selectbox[1].select("AHP + WLC")
+    at.run()
+    at.switch_page("views/sites.py").run()
+    at.selectbox(key="sites_scenario").select("Same as sidebar")
+    at.selectbox(key="sites_method").select("Same as sidebar")
+    at.run()
+
     # A remembered site label dies with its scenario; this must fall back, not crash.
     at.sidebar.selectbox[0].select("Fertile farmland").run()
     check(at, "site page re-scores after a scenario change")
@@ -204,6 +237,41 @@ def main() -> int:
         return 1
     print("all checks passed")
     return 0
+
+
+def check_site_combinations(at) -> list:
+    """The first card of every picker combination, against the same combination
+    chosen in the sidebar. They must be the same site with the same score."""
+    import re
+
+    def first_card():
+        cards = [m.value for m in at.markdown if "location-card" in m.value and "Coordinates" in m.value]
+        return re.sub(r"\s+", " ", cards[0]) if cards else None
+
+    problems = []
+    at.switch_page("views/sites.py").run()
+    scenarios = at.selectbox(key="sites_scenario").options[1:]
+    methods = at.selectbox(key="sites_method").options[1:]
+    sidebar = (at.sidebar.selectbox[0].value, at.sidebar.selectbox[1].value)
+    for scenario in scenarios:
+        for method in methods:
+            at.sidebar.selectbox[0].select(sidebar[0])
+            at.sidebar.selectbox[1].select(sidebar[1])
+            at.selectbox(key="sites_scenario").select(scenario)
+            at.selectbox(key="sites_method").select(method)
+            at.run()
+            picked = first_card()
+            at.selectbox(key="sites_scenario").select("Same as sidebar")
+            at.selectbox(key="sites_method").select("Same as sidebar")
+            at.sidebar.selectbox[0].select(scenario)
+            at.sidebar.selectbox[1].select(method)
+            at.run()
+            if at.exception or picked != first_card():
+                problems.append(f"site picker differs from sidebar: {method} · {scenario}")
+    at.sidebar.selectbox[0].select(sidebar[0])
+    at.sidebar.selectbox[1].select(sidebar[1])
+    at.run()
+    return problems
 
 
 def check_class_shares() -> list:

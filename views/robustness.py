@@ -45,9 +45,21 @@ with tab_sens:
                 stack, active_weights)
             st.session_state["single_param"] = single_parameter_sensitivity(
                 stack, active_weights)
+            st.session_state["_sensitivity_for"] = {
+                "text": (f"{active['algorithm'].split(' + ')[0]} weights · {ui.scenario_label()} "
+                         f"· ±{delta_pct}%"),
+                "key": (tuple(sorted(active_weights.items())), delta_pct),
+            }
 
     sens = st.session_state.get("sensitivity")
     if sens:
+        made_for = st.session_state["_sensitivity_for"]
+        ui.setup_note(made_for["text"],
+                      made_for["key"] != (tuple(sorted(active_weights.items())), delta_pct),
+                      "Run sensitivity")
+        if "TOPSIS" in active["algorithm"]:
+            st.caption("Sensitivity always scores with WLC. It uses this method's "
+                       "weights, not its TOPSIS aggregation.")
         m1, m2, m3 = st.columns(3)
         m1.metric("Top-10 retained (mean)", f"{sens['mean_retained_pct']:.0f}%")
         m2.metric("Worst case", f"{sens['worst_retained_pct']:.0f}%")
@@ -125,9 +137,25 @@ with tab_cons:
             kw = ({"scenario": st.session_state.get("scenario")} if axis == "algorithms"
                   else {"algorithm": st.session_state.get("algorithm", "AHP + WLC")})
             st.session_state["consensus"] = CONS.consensus_report(stack, axis=axis, **kw)
+            st.session_state["_consensus_new"] = True
 
     rep = st.session_state.get("consensus")
     if rep:
+        # What it depends on differs by axis: all methods under one scenario, or
+        # all scenarios under one method. It always uses the default matrices.
+        held = (st.session_state.get("scenario") if rep["axis"] == "algorithms"
+                else st.session_state.get("algorithm"))
+        current = ("algorithms" if c_axis == "Algorithms" else "scenarios", held)
+        made_for = st.session_state.get("_consensus_for")
+        if not made_for or made_for["axis"] != rep["axis"] or st.session_state.pop("_consensus_new", False):
+            made_for = {"axis": rep["axis"], "held": held}
+            st.session_state["_consensus_for"] = made_for
+        ui.setup_note(
+            (f"all 4 methods · {made_for['held']}" if made_for["axis"] == "algorithms"
+             else f"all 5 scenarios · {made_for['held']}"),
+            current != (made_for["axis"], made_for["held"]), "Compute consensus")
+        if ui.matrix_is_edited():
+            st.caption("Consensus uses each scenario's default matrix, not your edited matrix.")
         n_var = len(rep["variants"])
         sites = rep["sites"]
         unanimous = [s for s in sites if s["unanimous"]]
@@ -187,9 +215,13 @@ with tab_algo:
             stack = build_criteria_stack(ui.DATA_DIR)
             st.session_state["algo_comparison"] = compare_algorithms(
                 stack, matrix, ahp_engine.criteria)
+            st.session_state["_comparison_for"] = {"text": f"all 4 methods · {ui.scenario_label()}",
+                                                   "key": matrix.tobytes()}
 
     comp = st.session_state.get("algo_comparison")
     if comp:
+        made_for = st.session_state["_comparison_for"]
+        ui.setup_note(made_for["text"], made_for["key"] != matrix.tobytes(), "Compare all algorithms")
         rows = [{
             "Algorithm": r["algorithm"],
             "Weighting": r["weighting"],
